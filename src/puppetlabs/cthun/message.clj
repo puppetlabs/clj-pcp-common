@@ -36,6 +36,19 @@
    :expires      ISO8601
    (s/optional-key :destination_report) s/Bool})
 
+;; NOTE(richardc) the overriding of :sender here is a bit janky, we accept
+;; that we can have anything in memory, but we'll check the Envelope
+;; schema later
+
+(def Message
+  "Defines the message objects we're using"
+  (merge Envelope
+         {:sender s/Str
+          :_hops [MessageHop]
+          :_data_frame (class (byte-array 0))
+          :_data_flags #{s/Keyword}
+          :_destination s/Str}))
+
 ;; string<->byte-array utilities
 
 (defn string->bytes
@@ -50,7 +63,7 @@
 
 ;; abstract message manipulation
 
-(defn make-message
+(s/defn ^:always-validate make-message :- Message
   "Returns a new empty message structure"
   []
   {:id ""
