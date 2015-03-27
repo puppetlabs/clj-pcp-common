@@ -1,6 +1,8 @@
 (ns puppetlabs.cthun.message
   (:require [org.clojars.smee.binary.core :as b]
             [cheshire.core :as cheshire]
+            [clj-time.core :as t]
+            [clj-time.format :as tf]
             [puppetlabs.kitchensink.core :as ks]
             [schema.core :as s]
             [slingshot.slingshot :refer [try+ throw+]]))
@@ -55,7 +57,7 @@
    :endpoints []
    :data_schema ""
    :sender ""
-   :expires nil
+   :expires "1970-01-01T00:00:00.000Z"
    :_hops []
    :_data_frame (byte-array 0)
    :_data_flags #{}
@@ -82,6 +84,18 @@
            hops (vec (:_hops message))
            new-hops (conj hops hop)]
        (assoc message :_hops new-hops))))
+
+(defn set-expiry
+  "Returns a message with new expiry"
+  ([message number unit]
+   (let [expiry (condp = unit
+                  :seconds (t/from-now (t/seconds number))
+                  :hours   (t/from-now (t/hours number))
+                  :days    (t/from-now (t/days number)))
+         expires (tf/unparse (tf/formatters :date-time) expiry)]
+         (set-expiry message expires)))
+  ([message timestamp]
+   (assoc message :expires timestamp)))
 
 (defn get-data
   "Returns the data from the data frame"

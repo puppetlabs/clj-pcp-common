@@ -19,6 +19,8 @@
                  [cheshire "5.4.0"]
                  [prismatic/schema "0.3.7"]
 
+                 [clj-time "0.9.0"]
+
                  [com.taoensso/nippy "2.7.1"]
 
                  [org.clojars.smee/binary "0.3.0"]
