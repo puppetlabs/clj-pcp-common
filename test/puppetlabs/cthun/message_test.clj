@@ -109,7 +109,7 @@
          (is (not true) "Unexpected exception"))))
     (testing "it decodes the null message"
       (is (= (filter-private (decode (byte-array [1, 1, 0 0 0 2, 123 125])))
-             {})))
+             (filter-private (make-message)))))
     (testing "it insists on a well-formed envelope"
       (try+
        (decode (byte-array [1,

@@ -199,9 +199,9 @@
                                         :data debug-data})])})
     (.toByteArray stream)))
 
-(defn decode
+(s/defn ^:always-validate decode :- Message
   "Returns a message object from a network format message"
-  [bytes]
+  [bytes :- ByteArray]
   (let [stream (java.io.ByteArrayInputStream. bytes)
         decoded (try+
                  (b/decode message-codec stream)
@@ -224,4 +224,4 @@
             (catch Throwable _
               (throw+ {:type ::envelope-invalid
                        :message (:message &throw-context)})))
-      (set-data envelope data-frame data-flags))))
+      (set-data (merge (make-message) envelope) data-frame data-flags))))
