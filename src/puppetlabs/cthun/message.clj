@@ -36,17 +36,25 @@
    :expires      ISO8601
    (s/optional-key :destination_report) s/Bool})
 
-;; NOTE(richardc) the overriding of :sender here is a bit janky, we accept
-;; that we can have anything in memory, but we'll check the Envelope
-;; schema later
+
+(def ByteArray
+  "Schema for a byte-array"
+  (class (byte-array 0)))
+
+(def FlagSet
+  "Schema for the message flags"
+   #{s/Keyword})
 
 (def Message
   "Defines the message objects we're using"
+  ;; NOTE(richardc) the overriding of :sender here is a bit janky, we
+  ;; accept that we can have anything in memory, but we'll check the
+  ;; Envelope schema when interacting with the network
   (merge Envelope
          {:sender s/Str
           :_hops [MessageHop]
-          :_data_frame (class (byte-array 0))
-          :_data_flags #{s/Keyword}
+          :_data_frame ByteArray
+          :_data_flags FlagSet
           :_destination s/Str}))
 
 ;; string<->byte-array utilities
@@ -86,10 +94,10 @@
       (dissoc :_data_flags)
       (dissoc :_hops)))
 
-(defn add-hop
+(s/defn ^:always-validate add-hop :- Message
   "Returns the message with a hop for the specified 'stage' added."
-  ([message stage] (add-hop message stage (ks/timestamp)))
-  ([message stage timestamp]
+  ([message :- Message stage :- s/Str] (add-hop message stage (ks/timestamp)))
+  ([message :- Message stage :- s/Str timestamp :- ISO8601]
    ;; TODO(richardc) this server field should come from the cert of this instance
      (let [hop {:server "cth://fake/server"
                 :time   timestamp
@@ -98,41 +106,41 @@
            new-hops (conj hops hop)]
        (assoc message :_hops new-hops))))
 
-(defn set-expiry
+(s/defn ^:always-validate set-expiry :- Message
   "Returns a message with new expiry"
-  ([message number unit]
+  ([message :- Message number :- s/Int unit :- s/Keyword]
    (let [expiry (condp = unit
                   :seconds (t/from-now (t/seconds number))
                   :hours   (t/from-now (t/hours number))
                   :days    (t/from-now (t/days number)))
          expires (tf/unparse (tf/formatters :date-time) expiry)]
          (set-expiry message expires)))
-  ([message timestamp]
+  ([message :- Message timestamp :- ISO8601]
    (assoc message :expires timestamp)))
 
-(defn get-data
+(s/defn ^:always-validate get-data :- ByteArray
   "Returns the data from the data frame"
-  [message]
+  [message :- Message]
   (:_data_frame message))
 
-(defn set-data
+(s/defn ^:always-validate set-data :- Message
   "Sets the data for the data frame"
-  ([message data] (set-data message data #{}))
-  ([message data flags]
+  ([message :- Message data :- ByteArray ] (set-data message data #{}))
+  ([message :- Message data :- ByteArray flags :- FlagSet ]
    (-> message
        (assoc :_data_frame data)
        (assoc :_data_flags flags))))
 
-(defn get-json-data
+(s/defn ^:always-validate get-json-data :- s/Any
   "Returns the data from the data frame decoded from json"
-  [message]
+  [message :- Message]
   (let [data (get-data message)
         decoded (cheshire/parse-string (bytes->string data) true)]
     decoded))
 
-(defn set-json-data
+(s/defn ^:always-validate set-json-data :- Message
   "Sets the data to be the json byte-array version of data"
-  [message data]
+  [message :- Message data :- s/Any]
   (set-data message (string->bytes (cheshire/generate-string data))))
 
 ;; message encoding/codecs
@@ -174,14 +182,13 @@
    :version (b/constant :byte 1)
    :chunks (b/repeated chunk-codec)))
 
-(defn encode
+(s/defn encode :- ByteArray
   "Returns a byte-array containing the message in network"
-  [message]
+  [message :- Message]
   (let [stream (java.io.ByteArrayOutputStream.)
         hops (:_hops message)
         envelope (string->bytes (cheshire/generate-string (filter-private message)))
         debug-data (string->bytes (cheshire/generate-string {:hops hops}))
-        envelope (string->bytes (cheshire/generate-string (filter-private (dissoc message :hops :data))))
         data-frame (or (:_data_frame message) (byte-array 0))
         data-flags (or (:_data_flags message) #{})]
     (b/encode message-codec stream
@@ -195,9 +202,9 @@
                                         :data debug-data})])})
     (.toByteArray stream)))
 
-(defn decode
+(s/defn ^:always-validate decode :- Message
   "Returns a message object from a network format message"
-  [bytes]
+  [bytes :- ByteArray]
   (let [stream (java.io.ByteArrayInputStream. bytes)
         decoded (try+
                  (b/decode message-codec stream)
@@ -220,4 +227,4 @@
             (catch Throwable _
               (throw+ {:type ::envelope-invalid
                        :message (:message &throw-context)})))
-      (set-data envelope data-frame data-flags))))
+      (set-data (merge (make-message) envelope) data-frame data-flags))))

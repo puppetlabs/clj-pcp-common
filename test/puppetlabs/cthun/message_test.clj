@@ -1,5 +1,6 @@
 (ns puppetlabs.cthun.message-test
   (:require [clojure.test :refer :all]
+            [schema.core :as s]
             [puppetlabs.cthun.message :refer :all]
             [slingshot.slingshot :refer [try+]]))
 
@@ -16,6 +17,29 @@
             :_data_flags #{}
             :_destination ""}))))
 
+(deftest add-hop-test
+  (with-redefs [puppetlabs.kitchensink.core/timestamp (fn [] "1971-02-03T04:05:06.000Z")]
+    (testing "it adds a hop"
+      (is (= [{:server "cth://fake/server"
+                       :time   "1971-09-01T03:04:05.000Z"
+                       :stage  "potato"}]
+             (:_hops (add-hop (make-message) "potato" "1971-09-01T03:04:05.000Z")))))
+    (testing "it allows timestamp to be optional"
+      (is (= [{:server "cth://fake/server"
+               :time   "1971-02-03T04:05:06.000Z"
+               :stage  "potato"}]
+             (:_hops (add-hop (make-message) "potato")))))
+    (testing "it adds hops in the expected order"
+      (is (= [{:server "cth://fake/server"
+               :time   "1971-02-03T04:05:06.000Z"
+               :stage  "potato"}
+              {:server "cth://fake/server"
+               :time   "1971-02-03T04:05:06.000Z"
+               :stage  "mash"}]
+             (:_hops (-> (make-message)
+                         (add-hop "potato")
+                         (add-hop "mash"))))))))
+
 (deftest set-expiry-test
   (testing "it sets expiries to what you tell it"
     (is (= (:expiry (set-expiry (make-message) "1971-01-01T00:00:00.000Z") "1971-01-01T00:00:00.000Z"))))
@@ -25,28 +49,28 @@
     ;; needs a slap.
     (is (not (= (:expiry (set-expiry (make-message) 3 :seconds)) "1970-01-01T00:00:00.000Z")))))
 
-(deftest add-hop-test
-  (with-redefs [puppetlabs.kitchensink.core/timestamp (fn [] "Tomorrow")]
-    (testing "it adds a hop"
-      (is (= [{:server "cth://fake/server"
-                       :time   "Another day"
-                       :stage  "potato"}]
-             (:_hops (add-hop (make-message) "potato" "Another day")))))
-    (testing "it allows timestamp to be optional"
-      (is (= [{:server "cth://fake/server"
-               :time   "Tomorrow"
-               :stage  "potato"}]
-             (:_hops (add-hop (make-message) "potato")))))
-    (testing "it adds hops in the expected order"
-      (is (= [{:server "cth://fake/server"
-               :time   "Tomorrow"
-               :stage  "potato"}
-              {:server "cth://fake/server"
-               :time   "Tomorrow"
-               :stage  "mash"}]
-             (:_hops (-> (make-message)
-                         (add-hop "potato")
-                         (add-hop "mash"))))))))
+(deftest get-data-test
+  (testing "it returns data from the data frame"
+    (let [message (assoc (make-message) :_data_frame (byte-array [4 6 2]))]
+      (is (= (vec (get-data message))
+             [4 6 2])))))
+
+(deftest set-data-test
+  (testing "it sets the data frame"
+    (let [message (set-data (make-message) (byte-array [1 2 3]))]
+      (is (= (vec (:_data_frame message))
+             [1 2 3])))))
+
+(deftest get-json-data-test
+  (testing "it json decodes the data frame"
+    (let [message (assoc (make-message) :_data_frame (string->bytes "{}"))]
+      (is (= (get-json-data message) {})))))
+
+(deftest set-json-data-test
+  (testing "it json encodes to the data frame"
+    (let [message (set-json-data (make-message) {})]
+      (is (= (bytes->string (:_data_frame message))
+             "{}")))))
 
 (deftest encode-descriptor-test
   (testing "it encodes"
@@ -67,6 +91,13 @@
            (decode-descriptor 2r10010001)))))
 
 (deftest encode-test
+  (testing "when being strict, we take a Message only"
+    (s/with-fn-validation
+      (try+
+       (encode {})
+       (catch [:type :schema.core/error] m
+         (is true "Rejected an empty map as a Message"))
+       (else (is (not true) "Expected exception to be raised when passed an empty map")))))
   (testing "it returns a byte array"
     ;; subsequent tests will use vec to ignore this
     (is (= (class (encode {}))
@@ -83,7 +114,7 @@
             2, 0 0 0 0,
             3, 0 0 0 15, 123 34 104 111 112 115 34 58 34 115 111 109 101 34 125])))
   (testing "it encodes the data chunk"
-    (is (= (vec (encode (set-data {} (byte-array (map byte "haha")))))
+    (is (= (vec (encode {:_data_frame (string->bytes "haha")}))
            [1,
             1, 0 0 0 2, 123 125,
             2, 0 0 0 4, 104 97 104 97]))))
@@ -109,7 +140,7 @@
          (is (not true) "Unexpected exception"))))
     (testing "it decodes the null message"
       (is (= (filter-private (decode (byte-array [1, 1, 0 0 0 2, 123 125])))
-             {})))
+             (filter-private (make-message)))))
     (testing "it insists on a well-formed envelope"
       (try+
        (decode (byte-array [1,
@@ -139,7 +170,7 @@
   (with-redefs [schema.core/validate (fn [s d] d)]
     (testing "it can roundtrip data"
       (let [data (byte-array (map byte "hola"))
-            encoded (encode (set-data {} data))
+            encoded (encode (set-data (make-message) data))
             decoded (decode encoded)]
         (is (= (vec (get-data decoded))
                (vec data)))))))
