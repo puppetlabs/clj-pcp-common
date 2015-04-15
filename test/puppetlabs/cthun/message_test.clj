@@ -49,6 +49,17 @@
                          (add-hop "potato")
                          (add-hop "mash"))))))))
 
+(deftest get-json-data-test
+  (testing "it json decodes the data frame"
+    (let [message (assoc (make-message) :_data_frame (string->bytes "{}"))]
+      (is (= (get-json-data message) {})))))
+
+(deftest set-json-data-test
+  (testing "it json encodes to the data frame"
+    (let [message (set-json-data (make-message) {})]
+      (is (= (bytes->string (:_data_frame message))
+             "{}")))))
+
 (deftest encode-descriptor-test
   (testing "it encodes"
     (is (= 1

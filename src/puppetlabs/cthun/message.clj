@@ -127,16 +127,16 @@
        (assoc :_data_frame data)
        (assoc :_data_flags flags))))
 
-(defn get-json-data
+(s/defn ^:always-validate get-json-data :- s/Any
   "Returns the data from the data frame decoded from json"
-  [message]
+  [message :- Message]
   (let [data (get-data message)
         decoded (cheshire/parse-string (bytes->string data) true)]
     decoded))
 
-(defn set-json-data
+(s/defn ^:always-validate set-json-data :- Message
   "Sets the data to be the json byte-array version of data"
-  [message data]
+  [message :- Message data :- s/Any]
   (set-data message (string->bytes (cheshire/generate-string data))))
 
 ;; message encoding/codecs
