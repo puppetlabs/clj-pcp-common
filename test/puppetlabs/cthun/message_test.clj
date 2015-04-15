@@ -18,23 +18,23 @@
             :_destination ""}))))
 
 (deftest add-hop-test
-  (with-redefs [puppetlabs.kitchensink.core/timestamp (fn [] "Tomorrow")]
+  (with-redefs [puppetlabs.kitchensink.core/timestamp (fn [] "1971-02-03T04:05:06.000Z")]
     (testing "it adds a hop"
       (is (= [{:server "cth://fake/server"
-                       :time   "Another day"
+                       :time   "1971-09-01T03:04:05.000Z"
                        :stage  "potato"}]
-             (:_hops (add-hop (make-message) "potato" "Another day")))))
+             (:_hops (add-hop (make-message) "potato" "1971-09-01T03:04:05.000Z")))))
     (testing "it allows timestamp to be optional"
       (is (= [{:server "cth://fake/server"
-               :time   "Tomorrow"
+               :time   "1971-02-03T04:05:06.000Z"
                :stage  "potato"}]
              (:_hops (add-hop (make-message) "potato")))))
     (testing "it adds hops in the expected order"
       (is (= [{:server "cth://fake/server"
-               :time   "Tomorrow"
+               :time   "1971-02-03T04:05:06.000Z"
                :stage  "potato"}
               {:server "cth://fake/server"
-               :time   "Tomorrow"
+               :time   "1971-02-03T04:05:06.000Z"
                :stage  "mash"}]
              (:_hops (-> (make-message)
                          (add-hop "potato")

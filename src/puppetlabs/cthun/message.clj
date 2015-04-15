@@ -94,10 +94,10 @@
       (dissoc :_data_flags)
       (dissoc :_hops)))
 
-(defn add-hop
+(s/defn ^:always-validate add-hop :- Message
   "Returns the message with a hop for the specified 'stage' added."
-  ([message stage] (add-hop message stage (ks/timestamp)))
-  ([message stage timestamp]
+  ([message :- Message stage :- s/Str] (add-hop message stage (ks/timestamp)))
+  ([message :- Message stage :- s/Str timestamp :- ISO8601]
    ;; TODO(richardc) this server field should come from the cert of this instance
      (let [hop {:server "cth://fake/server"
                 :time   timestamp
