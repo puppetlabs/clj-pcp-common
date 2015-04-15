@@ -17,15 +17,6 @@
             :_data_flags #{}
             :_destination ""}))))
 
-(deftest set-expiry-test
-  (testing "it sets expiries to what you tell it"
-    (is (= (:expiry (set-expiry (make-message) "1971-01-01T00:00:00.000Z") "1971-01-01T00:00:00.000Z"))))
-  (testing "it supports relative time"
-    ;; Hello future test debugger.  At one point someone said "we
-    ;; should never be 3 seconds before the epoch".  Past test writer
-    ;; needs a slap.
-    (is (not (= (:expiry (set-expiry (make-message) 3 :seconds)) "1970-01-01T00:00:00.000Z")))))
-
 (deftest add-hop-test
   (with-redefs [puppetlabs.kitchensink.core/timestamp (fn [] "Tomorrow")]
     (testing "it adds a hop"
@@ -48,6 +39,15 @@
              (:_hops (-> (make-message)
                          (add-hop "potato")
                          (add-hop "mash"))))))))
+
+(deftest set-expiry-test
+  (testing "it sets expiries to what you tell it"
+    (is (= (:expiry (set-expiry (make-message) "1971-01-01T00:00:00.000Z") "1971-01-01T00:00:00.000Z"))))
+  (testing "it supports relative time"
+    ;; Hello future test debugger.  At one point someone said "we
+    ;; should never be 3 seconds before the epoch".  Past test writer
+    ;; needs a slap.
+    (is (not (= (:expiry (set-expiry (make-message) 3 :seconds)) "1970-01-01T00:00:00.000Z")))))
 
 (deftest get-data-test
   (testing "it returns data from the data frame"
