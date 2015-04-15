@@ -41,6 +41,10 @@
   "Schema for a byte-array"
   (class (byte-array 0)))
 
+(def FlagSet
+  "Schema for the message flags"
+   #{s/Keyword})
+
 (def Message
   "Defines the message objects we're using"
   ;; NOTE(richardc) the overriding of :sender here is a bit janky, we
@@ -50,7 +54,7 @@
          {:sender s/Str
           :_hops [MessageHop]
           :_data_frame ByteArray
-          :_data_flags #{s/Keyword}
+          :_data_flags FlagSet
           :_destination s/Str}))
 
 ;; string<->byte-array utilities
@@ -114,15 +118,15 @@
   ([message timestamp]
    (assoc message :expires timestamp)))
 
-(defn get-data
+(s/defn ^:always-validate get-data :- ByteArray
   "Returns the data from the data frame"
-  [message]
+  [message :- Message]
   (:_data_frame message))
 
-(defn set-data
+(s/defn ^:always-validate set-data :- Message
   "Sets the data for the data frame"
-  ([message data] (set-data message data #{}))
-  ([message data flags]
+  ([message :- Message data :- ByteArray ] (set-data message data #{}))
+  ([message :- Message data :- ByteArray flags :- FlagSet ]
    (-> message
        (assoc :_data_frame data)
        (assoc :_data_flags flags))))

@@ -49,6 +49,18 @@
                          (add-hop "potato")
                          (add-hop "mash"))))))))
 
+(deftest get-data-test
+  (testing "it returns data from the data frame"
+    (let [message (assoc (make-message) :_data_frame (byte-array [4 6 2]))]
+      (is (= (vec (get-data message))
+             [4 6 2])))))
+
+(deftest set-data-test
+  (testing "it sets the data frame"
+    (let [message (set-data (make-message) (byte-array [1 2 3]))]
+      (is (= (vec (:_data_frame message))
+             [1 2 3])))))
+
 (deftest get-json-data-test
   (testing "it json decodes the data frame"
     (let [message (assoc (make-message) :_data_frame (string->bytes "{}"))]
@@ -102,7 +114,7 @@
             2, 0 0 0 0,
             3, 0 0 0 15, 123 34 104 111 112 115 34 58 34 115 111 109 101 34 125])))
   (testing "it encodes the data chunk"
-    (is (= (vec (encode (set-data {} (byte-array (map byte "haha")))))
+    (is (= (vec (encode {:_data_frame (string->bytes "haha")}))
            [1,
             1, 0 0 0 2, 123 125,
             2, 0 0 0 4, 104 97 104 97]))))
@@ -158,7 +170,7 @@
   (with-redefs [schema.core/validate (fn [s d] d)]
     (testing "it can roundtrip data"
       (let [data (byte-array (map byte "hola"))
-            encoded (encode (set-data {} data))
+            encoded (encode (set-data (make-message) data))
             decoded (decode encoded)]
         (is (= (vec (get-data decoded))
                (vec data)))))))
