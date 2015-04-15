@@ -106,16 +106,16 @@
            new-hops (conj hops hop)]
        (assoc message :_hops new-hops))))
 
-(defn set-expiry
+(s/defn ^:always-validate set-expiry :- Message
   "Returns a message with new expiry"
-  ([message number unit]
+  ([message :- Message number :- s/Int unit :- s/Keyword]
    (let [expiry (condp = unit
                   :seconds (t/from-now (t/seconds number))
                   :hours   (t/from-now (t/hours number))
                   :days    (t/from-now (t/days number)))
          expires (tf/unparse (tf/formatters :date-time) expiry)]
          (set-expiry message expires)))
-  ([message timestamp]
+  ([message :- Message timestamp :- ISO8601]
    (assoc message :expires timestamp)))
 
 (s/defn ^:always-validate get-data :- ByteArray
