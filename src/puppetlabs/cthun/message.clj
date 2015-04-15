@@ -178,14 +178,13 @@
    :version (b/constant :byte 1)
    :chunks (b/repeated chunk-codec)))
 
-(defn encode
+(s/defn encode :- ByteArray
   "Returns a byte-array containing the message in network"
-  [message]
+  [message :- Message]
   (let [stream (java.io.ByteArrayOutputStream.)
         hops (:_hops message)
         envelope (string->bytes (cheshire/generate-string (filter-private message)))
         debug-data (string->bytes (cheshire/generate-string {:hops hops}))
-        envelope (string->bytes (cheshire/generate-string (filter-private (dissoc message :hops :data))))
         data-frame (or (:_data_frame message) (byte-array 0))
         data-flags (or (:_data_flags message) #{})]
     (b/encode message-codec stream

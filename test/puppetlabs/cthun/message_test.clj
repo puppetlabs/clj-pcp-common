@@ -1,5 +1,6 @@
 (ns puppetlabs.cthun.message-test
   (:require [clojure.test :refer :all]
+            [schema.core :as s]
             [puppetlabs.cthun.message :refer :all]
             [slingshot.slingshot :refer [try+]]))
 
@@ -67,6 +68,13 @@
            (decode-descriptor 2r10010001)))))
 
 (deftest encode-test
+  (testing "when being strict, we take a Message only"
+    (s/with-fn-validation
+      (try+
+       (encode {})
+       (catch [:type :schema.core/error] m
+         (is true "Rejected an empty map as a Message"))
+       (else (is (not true) "Expected exception to be raised when passed an empty map")))))
   (testing "it returns a byte array"
     ;; subsequent tests will use vec to ignore this
     (is (= (class (encode {}))
