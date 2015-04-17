@@ -13,13 +13,13 @@
   "Schema validates if string conforms to ISO8601"
   (s/pred ks/datetime? 'datetime?))
 
-(def Endpoint
-  "Pattern that matches valid endpoints"
-  (s/pred (partial re-matches #"cth://(server|.*/.*)") 'endpoint?))
+(def Uri
+  "Schema for Cthun node Uri"
+  (s/pred (partial re-matches #"^cth://[^/]*/[^/]+$") 'uri?))
 
 (def MessageHop
   "Map that describes a step in message delivery"
-  {(s/required-key :server) Endpoint
+  {(s/required-key :server) Uri
    (s/optional-key :stage) s/Str
    (s/required-key :time) ISO8601})
 
@@ -30,8 +30,8 @@
 (def Envelope
   "Defines the envelope format of a v2 message"
   {:id           MessageId
-   :sender       Endpoint
-   :endpoints    [Endpoint]
+   :sender       Uri
+   :endpoints    [Uri]
    :data_schema  s/Str
    :expires      ISO8601
    (s/optional-key :destination_report) s/Bool})

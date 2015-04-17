@@ -4,6 +4,16 @@
             [puppetlabs.cthun.message :refer :all]
             [slingshot.slingshot :refer [try+]]))
 
+(deftest uri-schema-test
+  (testing "valid uris"
+    (is (= (s/validate Uri "cth:///server") "cth:///server"))
+    (is (= (s/validate Uri "cth://bananas/server") "cth://bananas/server"))
+    (is (= (s/validate Uri "cth://shoes/test") "cth://shoes/test")))
+  (testing "invalid uris"
+    (is (thrown? Exception (s/validate Uri "cth://server")))
+    (is (thrown? Exception (s/validate Uri "server")))
+    (is (thrown? Exception (s/validate Uri "cth://test/with/too_many_slashes")))))
+
 (deftest make-message-test
   (testing "it makes a message"
     (is (= (assoc (make-message) :_data_frame [])
