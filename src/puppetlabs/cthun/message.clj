@@ -32,7 +32,7 @@
   {:id           MessageId
    :sender       Uri
    :targets      [Uri]
-   :data_schema  s/Str
+   :message_type s/Str
    :expires      ISO8601
    (s/optional-key :destination_report) s/Bool})
 
@@ -76,7 +76,7 @@
   []
   {:id ""
    :targets []
-   :data_schema ""
+   :message_type ""
    :sender ""
    :expires "1970-01-01T00:00:00.000Z"
    :_hops []
