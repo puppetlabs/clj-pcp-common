@@ -21,7 +21,7 @@
             :sender ""
             :targets []
             :expires "1970-01-01T00:00:00.000Z"
-            :data_schema ""
+            :message_type ""
             :_hops []
             :_data_frame []
             :_data_flags #{}
