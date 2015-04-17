@@ -19,13 +19,13 @@
     (is (= (assoc (make-message) :_data_frame [])
            {:id ""
             :sender ""
-            :endpoints []
+            :targets []
             :expires "1970-01-01T00:00:00.000Z"
             :data_schema ""
             :_hops []
             :_data_frame []
             :_data_flags #{}
-            :_destination ""}))))
+            :_target ""}))))
 
 (deftest add-hop-test
   (with-redefs [puppetlabs.kitchensink.core/timestamp (fn [] "1971-02-03T04:05:06.000Z")]
