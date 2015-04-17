@@ -31,7 +31,7 @@
   "Defines the envelope format of a v2 message"
   {:id           MessageId
    :sender       Uri
-   :endpoints    [Uri]
+   :targets      [Uri]
    :data_schema  s/Str
    :expires      ISO8601
    (s/optional-key :destination_report) s/Bool})
@@ -55,7 +55,7 @@
           :_hops [MessageHop]
           :_data_frame ByteArray
           :_data_flags FlagSet
-          :_destination s/Str}))
+          :_target s/Str}))
 
 ;; string<->byte-array utilities
 
@@ -75,21 +75,21 @@
   "Returns a new empty message structure"
   []
   {:id ""
-   :endpoints []
+   :targets []
    :data_schema ""
    :sender ""
    :expires "1970-01-01T00:00:00.000Z"
    :_hops []
    :_data_frame (byte-array 0)
    :_data_flags #{}
-   :_destination ""})
+   :_target ""})
 
 (defn filter-private
   "Returns the map without any of the known 'private' keys.  Should
   map to an envelope schema."
   [message]
   (-> message
-      (dissoc :_destination)
+      (dissoc :_target)
       (dissoc :_data_frame)
       (dissoc :_data_flags)
       (dissoc :_hops)))
