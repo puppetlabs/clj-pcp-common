@@ -16,8 +16,8 @@
 
                  [puppetlabs/kitchensink "1.1.0"]
 
-                 [cheshire "5.4.0"]
                  [prismatic/schema "0.3.7"]
+                 [cheshire "5.5.0"]
 
                  [clj-time "0.9.0"]
 
