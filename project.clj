@@ -16,12 +16,12 @@
 
                  [puppetlabs/kitchensink "1.1.0"]
 
-                 [cheshire "5.4.0"]
-                 [prismatic/schema "0.3.7"]
+                 [cheshire "5.5.0"]
+                 [prismatic/schema "0.4.3"]
 
                  [clj-time "0.9.0"]
 
-                 [com.taoensso/nippy "2.7.1"]
+                 [com.taoensso/nippy "2.9.0"]
 
                  [org.clojars.smee/binary "0.3.0"]
 
