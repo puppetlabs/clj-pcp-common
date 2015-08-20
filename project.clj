@@ -11,6 +11,11 @@
   :license {:name ""
             :url ""}
 
+  ;; Abort when version ranges or version conflicts are detected in
+  ;; dependencies. Also supports :warn to simply emit warnings.
+  ;; requires lein 2.2.0+.
+  :pedantic? :abort
+
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/tools.logging "0.3.1"]
 
@@ -28,7 +33,7 @@
                  ;; try+/throw+
                  [slingshot "0.12.2"]]
 
-  :plugins [[lein-release "1.0.5"]]
+  :plugins [[lein-release "1.0.5" :exclusions [org.clojure/clojure]]]
 
   :repositories [["releases" "http://nexus.delivery.puppetlabs.net/content/repositories/releases/"]
                  ["snapshots"  "http://nexus.delivery.puppetlabs.net/content/repositories/snapshots/"]]
