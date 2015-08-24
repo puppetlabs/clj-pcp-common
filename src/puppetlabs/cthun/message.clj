@@ -156,7 +156,7 @@
   [type]
   (let [type-bits (:type type)
         flag-set  (:flags type)
-        flags (apply bit-or 0 0 (remove nil? (map (fn [[mask name]] (if (name flag-set) mask)) flag-bits)))
+        flags (apply bit-or 0 0 (remove nil? (map (fn [[mask name]] (if (contains? flag-set name) mask)) flag-bits)))
         byte (bit-or type-bits (bit-shift-left flags 4))]
     byte))
 
