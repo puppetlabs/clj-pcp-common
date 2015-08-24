@@ -2,7 +2,7 @@
   (:require [clojure.test :refer :all]
             [schema.core :as s]
             [puppetlabs.cthun.message :refer :all]
-            [slingshot.slingshot :refer [try+]]))
+            [slingshot.test]))
 
 (deftest uri-schema-test
   (testing "valid uris"
@@ -52,12 +52,12 @@
 
 (deftest set-expiry-test
   (testing "it sets expiries to what you tell it"
-    (is (= (:expiry (set-expiry (make-message) "1971-01-01T00:00:00.000Z") "1971-01-01T00:00:00.000Z"))))
+    (is (= (:expires (set-expiry (make-message) "1971-01-01T00:00:00.000Z")) "1971-01-01T00:00:00.000Z")))
   (testing "it supports relative time"
     ;; Hello future test debugger.  At one point someone said "we
     ;; should never be 3 seconds before the epoch".  Past test writer
     ;; needs a slap.
-    (is (not (= (:expiry (set-expiry (make-message) 3 :seconds)) "1970-01-01T00:00:00.000Z")))))
+    (is (not (= (:expires (set-expiry (make-message) 3 :seconds)) "1970-01-01T00:00:00.000Z")))))
 
 (deftest get-data-test
   (testing "it returns data from the data frame"
@@ -103,11 +103,9 @@
 (deftest encode-test
   (testing "when being strict, we take a Message only"
     (s/with-fn-validation
-      (try+
-       (encode {})
-       (catch [:type :schema.core/error] m
-         (is true "Rejected an empty map as a Message"))
-       (else (is (not true) "Expected exception to be raised when passed an empty map")))))
+      (is (thrown+? [:type :schema.core/error]
+                    (encode {}))
+          "Rejected an empty map as a Message")))
   (testing "it returns a byte array"
     ;; subsequent tests will use vec to ignore this
     (is (= (class (encode {}))
@@ -132,44 +130,24 @@
 (deftest decode-test
   (with-redefs [schema.core/validate (fn [s d] d)]
     (testing "it only handles version 1 messages"
-      (try+
-       (decode (byte-array [2]))
-       (is (not true) "Expected exception to be raised for non type-1 message")
-       (catch map? m
-         (is (= :puppetlabs.cthun.message/message-malformed (:type m))))
-       (catch Object _
-         (is (not true) "Unexpected exception"))))
+      (is (thrown+? [:type :puppetlabs.cthun.message/message-malformed]
+                    (decode (byte-array [2])))))
     (testing "it insists on envelope chunk first"
-      (try+
-       (decode (byte-array [1,
-                            2, 0 0 0 2, 123 125]))
-       (is (not true) "Expected exception to be thrown by decode when first chunk is not type 1")
-       (catch map? m
-         (is (= :puppetlabs.cthun.message/message-invalid (:type m))))
-       (catch Object _
-         (is (not true) "Unexpected exception"))))
+      (is (thrown+? [:type :puppetlabs.cthun.message/message-invalid]
+                    (decode (byte-array [1,
+                                         2, 0 0 0 2, 123 125])))))
     (testing "it decodes the null message"
       (is (= (filter-private (decode (byte-array [1, 1, 0 0 0 2, 123 125])))
              (filter-private (make-message)))))
     (testing "it insists on a well-formed envelope"
-      (try+
-       (decode (byte-array [1,
-                            1, 0 0 0 1, 123]))
-       (is (not true) "Expected exception to be thrown by decode when envelope is invalid")
-       (catch map? m
-         (is (= :puppetlabs.cthun.message/envelope-malformed (:type m))))
-       (catch Object _
-         (is (not true) "Unexpected exception"))))
+      (is (thrown+? [:type :puppetlabs.cthun.message/envelope-malformed]
+                    (decode (byte-array [1,
+                                         1, 0 0 0 1, 123])))))
     (testing "it insists on a complete envelope"
       (with-redefs [schema.core/validate (fn [s d] (throw (Exception. "oh dear")))]
-        (try+
-         (decode (byte-array [1,
-                              1, 0 0 0 2, 123 125]))
-         (is (not true) "Expected exception to be thrown by decode when envelope is invalid")
-         (catch map? m
-           (is (= :puppetlabs.cthun.message/envelope-invalid (:type m))))
-         (catch Object _
-           (is (not true) "Unexpected exception")))))
+        (is (thrown+? [:type :puppetlabs.cthun.message/envelope-invalid]
+                      (decode (byte-array [1,
+                                           1, 0 0 0 2, 123 125]))))))
     (testing "data is accessible"
       (let [message (decode (byte-array [1,
                                          1, 0 0 0 2, 123 125,
