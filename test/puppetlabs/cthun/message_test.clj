@@ -1,8 +1,13 @@
 (ns puppetlabs.cthun.message-test
   (:require [clojure.test :refer :all]
-            [schema.core :as s]
             [puppetlabs.cthun.message :refer :all]
+            [puppetlabs.kitchensink.core :as ks]
+            [schema.core :as s]
             [slingshot.test]))
+
+(deftest uuid?-test
+  (is (uuid? (ks/uuid)))
+  (is (not (uuid? "let me tell you a story"))))
 
 (deftest uri-schema-test
   (testing "valid uris"
@@ -16,16 +21,14 @@
 
 (deftest make-message-test
   (testing "it makes a message"
-    (is (= (assoc (make-message) :_data_frame [])
-           {:id ""
-            :sender ""
+    (is (= {:sender ""
             :targets []
             :expires "1970-01-01T00:00:00.000Z"
             :message_type ""
             :_hops []
-            :_data_frame []
             :_data_flags #{}
-            :_target ""}))))
+            :_target ""}
+           (dissoc (make-message) :_data_frame :id)))))
 
 (deftest add-hop-test
   (with-redefs [puppetlabs.kitchensink.core/timestamp (fn [] "1971-02-03T04:05:06.000Z")]

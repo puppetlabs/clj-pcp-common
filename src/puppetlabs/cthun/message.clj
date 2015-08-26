@@ -23,9 +23,13 @@
    (s/optional-key :stage) s/Str
    (s/required-key :time) ISO8601})
 
+(defn uuid?
+  [uuid]
+  (re-matches #"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$" uuid))
+
 (def MessageId
-  "A message identfier" ;; TODO(richardc) check it looks like a UUID maybe?
-  s/Str)
+  "A message identfier"
+  (s/pred uuid?))
 
 (def Envelope
   "Defines the envelope format of a v2 message"
@@ -74,7 +78,7 @@
 (s/defn ^:always-validate make-message :- Message
   "Returns a new empty message structure"
   []
-  {:id ""
+  {:id (ks/uuid)
    :targets []
    :message_type ""
    :sender ""
