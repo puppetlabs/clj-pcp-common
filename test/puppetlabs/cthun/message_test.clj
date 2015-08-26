@@ -24,34 +24,8 @@
     (is (= {:sender ""
             :targets []
             :expires "1970-01-01T00:00:00.000Z"
-            :message_type ""
-            :_hops []
-            :_data_flags #{}
-            :_target ""}
-           (dissoc (make-message) :_data_frame :id)))))
-
-(deftest add-hop-test
-  (with-redefs [puppetlabs.kitchensink.core/timestamp (fn [] "1971-02-03T04:05:06.000Z")]
-    (testing "it adds a hop"
-      (is (= [{:server "cth://fake/server"
-                       :time   "1971-09-01T03:04:05.000Z"
-                       :stage  "potato"}]
-             (:_hops (add-hop (make-message) "potato" "1971-09-01T03:04:05.000Z")))))
-    (testing "it allows timestamp to be optional"
-      (is (= [{:server "cth://fake/server"
-               :time   "1971-02-03T04:05:06.000Z"
-               :stage  "potato"}]
-             (:_hops (add-hop (make-message) "potato")))))
-    (testing "it adds hops in the expected order"
-      (is (= [{:server "cth://fake/server"
-               :time   "1971-02-03T04:05:06.000Z"
-               :stage  "potato"}
-              {:server "cth://fake/server"
-               :time   "1971-02-03T04:05:06.000Z"
-               :stage  "mash"}]
-             (:_hops (-> (make-message)
-                         (add-hop "potato")
-                         (add-hop "mash"))))))))
+            :message_type ""}
+           (dissoc (make-message) :_chunks :id)))))
 
 (deftest set-expiry-test
   (testing "it sets expiries to what you tell it"
@@ -64,25 +38,25 @@
 
 (deftest get-data-test
   (testing "it returns data from the data frame"
-    (let [message (assoc (make-message) :_data_frame (byte-array [4 6 2]))]
-      (is (= (vec (get-data message))
-             [4 6 2])))))
+    (let [message (set-data (make-message) (byte-array [4 6 2]))]
+      (is (= [4 6 2]
+             (vec (get-data message)))))))
 
 (deftest set-data-test
   (testing "it sets the data frame"
     (let [message (set-data (make-message) (byte-array [1 2 3]))]
-      (is (= (vec (:_data_frame message))
+      (is (= (vec (get-data message))
              [1 2 3])))))
 
 (deftest get-json-data-test
   (testing "it json decodes the data frame"
-    (let [message (assoc (make-message) :_data_frame (string->bytes "{}"))]
+    (let [message (set-data (make-message) (string->bytes "{}"))]
       (is (= (get-json-data message) {})))))
 
 (deftest set-json-data-test
   (testing "it json encodes to the data frame"
     (let [message (set-json-data (make-message) {})]
-      (is (= (bytes->string (:_data_frame message))
+      (is (= (bytes->string (get-data message))
              "{}")))))
 
 (deftest encode-descriptor-test
@@ -109,26 +83,27 @@
       (is (thrown+? [:type :schema.core/error]
                     (encode {}))
           "Rejected an empty map as a Message")))
-  (testing "it returns a byte array"
-    ;; subsequent tests will use vec to ignore this
-    (is (= (class (encode {}))
-           (class (byte-array 0)))))
-  (testing "it encodes a message"
-    (is (= (vec (encode {}))
-           [1,
-            1, 0 0 0 2, 123 125,
-            2, 0 0 0 0])))
-  (testing "it adds :hops as an optional final chunk"
-    (is (= (vec (encode {:_hops "some"}))
-           [1,
-            1, 0 0 0 2, 123 125,
-            2, 0 0 0 0,
-            3, 0 0 0 15, 123 34 104 111 112 115 34 58 34 115 111 109 101 34 125])))
-  (testing "it encodes the data chunk"
-    (is (= (vec (encode {:_data_frame (string->bytes "haha")}))
-           [1,
-            1, 0 0 0 2, 123 125,
-            2, 0 0 0 4, 104 97 104 97]))))
+  (with-redefs [message->envelope (constantly {})]
+    (testing "it returns a byte array"
+      ;; subsequent tests will use vec to ignore this
+      (is (= (class (byte-array 0))
+             (class (encode (make-message))))))
+    (testing "it encodes a message"
+      (is (= [1,
+              1, 0 0 0 2, 123 125,
+              2, 0 0 0 0]
+             (vec (encode (make-message))))))
+    (testing "it adds debug type as an optional final chunk"
+      (is (= [1,
+              1, 0 0 0 2, 123 125,
+              2, 0 0 0 0,
+              3, 0 0 0 4, 115 111 109 101]
+             (vec (encode (set-debug (make-message) (string->bytes "some")))))))
+    (testing "it encodes the data chunk"
+      (is (= [1,
+              1, 0 0 0 2, 123 125,
+              2, 0 0 0 4, 104 97 104 97]
+             (vec (encode (set-data (make-message) (string->bytes "haha")))))))))
 
 (deftest decode-test
   (with-redefs [schema.core/validate (fn [s d] d)]
@@ -140,8 +115,8 @@
                     (decode (byte-array [1,
                                          2, 0 0 0 2, 123 125])))))
     (testing "it decodes the null message"
-      (is (= (filter-private (decode (byte-array [1, 1, 0 0 0 2, 123 125])))
-             (filter-private (make-message)))))
+      (is (= (dissoc (message->envelope (make-message)) :id)
+             (dissoc (message->envelope (decode (byte-array [1, 1, 0 0 0 2, 123 125]))) :id))))
     (testing "it insists on a well-formed envelope"
       (is (thrown+? [:type :puppetlabs.cthun.message/envelope-malformed]
                     (decode (byte-array [1,
@@ -155,7 +130,13 @@
       (let [message (decode (byte-array [1,
                                          1, 0 0 0 2, 123 125,
                                          2, 0 0 0 3, 108 111 108]))]
-        (is (= (String. (get-data message)) "lol"))))))
+        (is (= (String. (get-data message)) "lol"))))
+    (testing "debug is accessible"
+      (let [message (decode (byte-array [1,
+                                         1, 0 0 0 2, 123 125,
+                                         2, 0 0 0 0,
+                                         3, 0 0 0 3, 108 111 108]))]
+        (is (= "lol" (String. (get-debug message))))))))
 
 (deftest encoder-roundtrip-test
   (with-redefs [schema.core/validate (fn [s d] d)]

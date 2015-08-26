@@ -40,7 +40,6 @@
    :expires      ISO8601
    (s/optional-key :destination_report) s/Bool})
 
-
 (def ByteArray
   "Schema for a byte-array"
   (class (byte-array 0)))
@@ -56,10 +55,7 @@
   ;; Envelope schema when interacting with the network
   (merge Envelope
          {:sender s/Str
-          :_hops [MessageHop]
-          :_data_frame ByteArray
-          :_data_flags FlagSet
-          :_target s/Str}))
+          :_chunks {s/Keyword s/Any}}))
 
 ;; string<->byte-array utilities
 
@@ -74,41 +70,16 @@
   (String. bytes))
 
 ;; abstract message manipulation
-
-(s/defn ^:always-validate make-message :- Message
-  "Returns a new empty message structure"
-  []
-  {:id (ks/uuid)
-   :targets []
-   :message_type ""
-   :sender ""
-   :expires "1970-01-01T00:00:00.000Z"
-   :_hops []
-   :_data_frame (byte-array 0)
-   :_data_flags #{}
-   :_target ""})
-
-(defn filter-private
+(s/defn message->envelope :- Envelope
   "Returns the map without any of the known 'private' keys.  Should
   map to an envelope schema."
-  [message]
-  (-> message
-      (dissoc :_target)
-      (dissoc :_data_frame)
-      (dissoc :_data_flags)
-      (dissoc :_hops)))
+  [message :- Message]
+  (dissoc message :_chunks))
 
-(s/defn ^:always-validate add-hop :- Message
-  "Returns the message with a hop for the specified 'stage' added."
-  ([message :- Message stage :- s/Str] (add-hop message stage (ks/timestamp)))
-  ([message :- Message stage :- s/Str timestamp :- ISO8601]
-   ;; TODO(richardc) this server field should come from the cert of this instance
-     (let [hop {:server "cth://fake/server"
-                :time   timestamp
-                :stage  stage}
-           hops (vec (:_hops message))
-           new-hops (conj hops hop)]
-       (assoc message :_hops new-hops))))
+(defn filter-private
+  "Deprecated, use message->envelope if you need"
+  {:deprecated "0.2.0"}
+  [message] (message->envelope message))
 
 (s/defn ^:always-validate set-expiry :- Message
   "Returns a message with new expiry"
@@ -125,15 +96,28 @@
 (s/defn ^:always-validate get-data :- ByteArray
   "Returns the data from the data frame"
   [message :- Message]
-  (:_data_frame message))
+  (get-in message [:_chunks :data :data] (byte-array 0)))
+
+(s/defn ^:always-validate get-debug :- ByteArray
+  "Returns the data from the debug frame"
+  [message :- Message]
+  (get-in message [:_chunks :debug :data] (byte-array 0)))
 
 (s/defn ^:always-validate set-data :- Message
   "Sets the data for the data frame"
-  ([message :- Message data :- ByteArray ] (set-data message data #{}))
-  ([message :- Message data :- ByteArray flags :- FlagSet ]
-   (-> message
-       (assoc :_data_frame data)
-       (assoc :_data_flags flags))))
+  ([message :- Message data :- ByteArray] (set-data message data #{}))
+  ([message :- Message data :- ByteArray flags :- FlagSet]
+   (assoc-in message [:_chunks :data] {:descriptor {:type 2
+                                                    :flags flags}
+                                       :data data})))
+
+(s/defn ^:always-validate set-debug :- Message
+  "Sets the data for the debug frame"
+  ([message :- Message data :- ByteArray] (set-debug message data #{}))
+  ([message :- Message data :- ByteArray flags :- FlagSet]
+   (assoc-in message [:_chunks :debug] {:descriptor {:type 3
+                                                     :flags flags}
+                                        :data data})))
 
 (s/defn ^:always-validate get-json-data :- s/Any
   "Returns the data from the data frame decoded from json"
@@ -142,10 +126,33 @@
         decoded (cheshire/parse-string (bytes->string data) true)]
     decoded))
 
+(s/defn ^:always-validate get-json-debug :- s/Any
+  "Returns the data from the debug frame decoded from json"
+  [message :- Message]
+  (let [data (get-debug message)
+        decoded (cheshire/parse-string (bytes->string data) true)]
+    decoded))
+
 (s/defn ^:always-validate set-json-data :- Message
   "Sets the data to be the json byte-array version of data"
   [message :- Message data :- s/Any]
   (set-data message (string->bytes (cheshire/generate-string data))))
+
+(s/defn ^:always-validate set-json-debug :- Message
+  "Sets the debug data to be the json byte-array version of data"
+  [message :- Message data :- s/Any]
+  (set-debug message (string->bytes (cheshire/generate-string data))))
+
+(s/defn ^:always-validate make-message :- Message
+  "Returns a new empty message structure"
+  []
+  (let [message {:id (ks/uuid)
+                 :targets []
+                 :message_type ""
+                 :sender ""
+                 :expires "1970-01-01T00:00:00.000Z"
+                 :_chunks {}}]
+    (set-data message (byte-array 0))))
 
 ;; message encoding/codecs
 
@@ -187,23 +194,15 @@
    :chunks (b/repeated chunk-codec)))
 
 (s/defn encode :- ByteArray
-  "Returns a byte-array containing the message in network"
   [message :- Message]
   (let [stream (java.io.ByteArrayOutputStream.)
-        hops (:_hops message)
-        envelope (string->bytes (cheshire/generate-string (filter-private message)))
-        debug-data (string->bytes (cheshire/generate-string {:hops hops}))
-        data-frame (or (:_data_frame message) (byte-array 0))
-        data-flags (or (:_data_flags message) #{})]
-    (b/encode message-codec stream
-              {:chunks (remove nil? [{:descriptor {:type 1}
-                                      :data envelope}
-                                     {:descriptor {:type 2
-                                                   :flags data-flags}
-                                      :data data-frame}
-                                     (if hops
-                                       {:descriptor {:type 3}
-                                        :data debug-data})])})
+        envelope (string->bytes (cheshire/generate-string (message->envelope message)))
+        chunks (into []
+                     (remove nil? [{:descriptor {:type 1}
+                                    :data envelope}
+                                   (get-in message [:_chunks :data])
+                                   (get-in message [:_chunks :debug])]))]
+    (b/encode message-codec stream {:chunks chunks})
     (.toByteArray stream)))
 
 (s/defn ^:always-validate decode :- Message
@@ -231,4 +230,9 @@
             (catch Throwable _
               (throw+ {:type ::envelope-invalid
                        :message (:message &throw-context)})))
-      (set-data (merge (make-message) envelope) data-frame data-flags))))
+      (let [message (set-data (merge (make-message) envelope) data-frame data-flags)]
+        (if-let [debug-chunk (get (:chunks decoded) 2)]
+          (let [debug-frame (or (:data debug-chunk) (byte-array 0))
+                debug-flags (or (get-in debug-chunk [:descriptor :flags]) #{})]
+            (set-debug message debug-frame debug-flags))
+          message)))))
