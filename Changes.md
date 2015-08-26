@@ -1,3 +1,10 @@
+# 0.2.0
+
+* Removed server state from Message (CTH-328)
+* Removed add-hops function
+* Added add-debug add-json-debug functions
+* Now verify that MessageId looks like a uuid
+
 # 0.1.0
 
 * Added prismatic schema schema.core/defn decorations to the rest of
