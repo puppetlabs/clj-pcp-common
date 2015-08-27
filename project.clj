@@ -5,7 +5,7 @@
    :password :env/nexus_jenkins_password
    :sign-releases false})
 
-(defproject puppetlabs/cthun-message "0.2.1-SNAPSHOT"
+(defproject puppetlabs/cthun-message "0.3.0-SNAPSHOT"
   :description "Message serialisation codec for cthun"
   :url "https://github.com/puppetlabs/clj-cthun-message"
   :license {:name ""
