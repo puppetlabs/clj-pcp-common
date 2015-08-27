@@ -5,20 +5,6 @@
             [schema.core :as s]
             [slingshot.test]))
 
-(deftest uuid?-test
-  (is (uuid? (ks/uuid)))
-  (is (not (uuid? "let me tell you a story"))))
-
-(deftest uri-schema-test
-  (testing "valid uris"
-    (is (= (s/validate Uri "cth:///server") "cth:///server"))
-    (is (= (s/validate Uri "cth://bananas/server") "cth://bananas/server"))
-    (is (= (s/validate Uri "cth://shoes/test") "cth://shoes/test")))
-  (testing "invalid uris"
-    (is (thrown? Exception (s/validate Uri "cth://server")))
-    (is (thrown? Exception (s/validate Uri "server")))
-    (is (thrown? Exception (s/validate Uri "cth://test/with/too_many_slashes")))))
-
 (deftest make-message-test
   (testing "it makes a message"
     (is (= {:sender ""

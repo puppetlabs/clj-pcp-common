@@ -4,50 +4,11 @@
             [clj-time.core :as t]
             [clj-time.format :as tf]
             [puppetlabs.kitchensink.core :as ks]
+            [puppetlabs.cthun.protocol :refer [Envelope ISO8601]]
             [schema.core :as s]
             [slingshot.slingshot :refer [try+ throw+]]))
 
-;; schemas for envelope validation
-
-(def ISO8601
-  "Schema validates if string conforms to ISO8601"
-  (s/pred ks/datetime? 'datetime?))
-
-(def Uri
-  "Schema for Cthun node Uri"
-  (s/pred (partial re-matches #"^cth://[^/]*/[^/]+$") 'uri?))
-
-(def MessageHop
-  "Map that describes a step in message delivery"
-  {(s/required-key :server) Uri
-   (s/optional-key :stage) s/Str
-   (s/required-key :time) ISO8601})
-
-(defn uuid?
-  [uuid]
-  (re-matches #"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$" uuid))
-
-(def MessageId
-  "A message identfier"
-  (s/pred uuid?))
-
-(def Envelope
-  "Defines the envelope format of a v2 message"
-  {:id           MessageId
-   :sender       Uri
-   :targets      [Uri]
-   :message_type s/Str
-   :expires      ISO8601
-   (s/optional-key :destination_report) s/Bool})
-
-(def ByteArray
-  "Schema for a byte-array"
-  (class (byte-array 0)))
-
-(def FlagSet
-  "Schema for the message flags"
-   #{s/Keyword})
-
+;; schemas for message validation
 (def Message
   "Defines the message objects we're using"
   ;; NOTE(richardc) the overriding of :sender here is a bit janky, we
@@ -56,6 +17,14 @@
   (merge Envelope
          {:sender s/Str
           :_chunks {s/Keyword s/Any}}))
+
+(def ByteArray
+  "Schema for a byte-array"
+  (class (byte-array 0)))
+
+(def FlagSet
+  "Schema for the message flags"
+   #{s/Keyword})
 
 ;; string<->byte-array utilities
 
