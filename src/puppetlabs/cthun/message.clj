@@ -145,13 +145,14 @@
 
 (s/defn ^:always-validate make-message :- Message
   "Returns a new empty message structure"
-  []
-  (let [message {:id (ks/uuid)
-                 :targets []
-                 :message_type ""
-                 :sender ""
-                 :expires "1970-01-01T00:00:00.000Z"
-                 :_chunks {}}]
+  [& args]
+  (let [message (into {:id (ks/uuid)
+                       :targets []
+                       :message_type ""
+                       :sender ""
+                       :expires "1970-01-01T00:00:00.000Z"
+                       :_chunks {}}
+                      (apply hash-map args))]
     (set-data message (byte-array 0))))
 
 ;; message encoding/codecs
