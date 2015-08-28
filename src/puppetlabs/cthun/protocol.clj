@@ -22,6 +22,7 @@
 (def Envelope
   "Defines the envelope format of a v2 message"
   {:id           MessageId
+   (s/optional-key :in-reply-to) MessageId
    :sender       Uri
    :targets      [Uri]
    :message_type s/Str
