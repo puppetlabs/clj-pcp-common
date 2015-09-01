@@ -1,8 +1,8 @@
-# clj-cthun-message
+# clj-pcp-common
 
-CThun message codec
+PCP message codec and protocol helpers
 
-https://github.com/puppetlabs/cthun-specifications
+https://github.com/puppetlabs/pcp-specifications
 
 
 # Installation
@@ -10,7 +10,7 @@ https://github.com/puppetlabs/cthun-specifications
 The jar is distributed via the internal nexus server, to use it add
 the following to your project.clj
 
-    :dependencies [[puppetlabs/cthun-message "0.1.0"]]
+    :dependencies [[puppetlabs/pcp-common "0.4.0"]]
 
     :repositories [["releases" "http://nexus.delivery.puppetlabs.net/content/repositories/releases/"]
                    ["snapshots" "http://nexus.delivery.puppetlabs.net/content/repositories/snapshots/"]]
@@ -19,7 +19,7 @@ the following to your project.clj
 
 ``` clojure
 (ns example
-   (:require [puppetlabs.cthun.message :as message]))
+   (:require [puppetlabs.pcp.message :as message]))
 
 (def message (message/make-message))
 ```

@@ -1,4 +1,4 @@
-(ns puppetlabs.cthun.protocol
+(ns puppetlabs.pcp.protocol
   (:require [clojure.string :as str]
             [puppetlabs.kitchensink.core :as ks]
             [schema.core :as s]))

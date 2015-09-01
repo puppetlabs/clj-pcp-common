@@ -1,3 +1,7 @@
+# 0.4.0
+
+* Renamed from former codenames to new component names.
+
 # 0.2.0
 
 * Removed server state from Message (CTH-328)
