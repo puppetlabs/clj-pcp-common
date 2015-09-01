@@ -1,6 +1,6 @@
-(ns puppetlabs.cthun.message-test
+(ns puppetlabs.pcp.message-test
   (:require [clojure.test :refer :all]
-            [puppetlabs.cthun.message :refer :all]
+            [puppetlabs.pcp.message :refer :all]
             [puppetlabs.kitchensink.core :as ks]
             [schema.core :as s]
             [slingshot.test]))
@@ -102,22 +102,22 @@
 (deftest decode-test
   (with-redefs [schema.core/validate (fn [s d] d)]
     (testing "it only handles version 1 messages"
-      (is (thrown+? [:type :puppetlabs.cthun.message/message-malformed]
+      (is (thrown+? [:type :puppetlabs.pcp.message/message-malformed]
                     (decode (byte-array [2])))))
     (testing "it insists on envelope chunk first"
-      (is (thrown+? [:type :puppetlabs.cthun.message/message-invalid]
+      (is (thrown+? [:type :puppetlabs.pcp.message/message-invalid]
                     (decode (byte-array [1,
                                          2, 0 0 0 2, 123 125])))))
     (testing "it decodes the null message"
       (is (= (dissoc (message->envelope (make-message)) :id)
              (dissoc (message->envelope (decode (byte-array [1, 1, 0 0 0 2, 123 125]))) :id))))
     (testing "it insists on a well-formed envelope"
-      (is (thrown+? [:type :puppetlabs.cthun.message/envelope-malformed]
+      (is (thrown+? [:type :puppetlabs.pcp.message/envelope-malformed]
                     (decode (byte-array [1,
                                          1, 0 0 0 1, 123])))))
     (testing "it insists on a complete envelope"
       (with-redefs [schema.core/validate (fn [s d] (throw (Exception. "oh dear")))]
-        (is (thrown+? [:type :puppetlabs.cthun.message/envelope-invalid]
+        (is (thrown+? [:type :puppetlabs.pcp.message/envelope-invalid]
                       (decode (byte-array [1,
                                            1, 0 0 0 2, 123 125]))))))
     (testing "data is accessible"

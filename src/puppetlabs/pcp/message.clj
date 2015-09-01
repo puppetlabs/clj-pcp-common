@@ -1,10 +1,10 @@
-(ns puppetlabs.cthun.message
+(ns puppetlabs.pcp.message
   (:require [org.clojars.smee.binary.core :as b]
             [cheshire.core :as cheshire]
             [clj-time.core :as t]
             [clj-time.format :as tf]
             [puppetlabs.kitchensink.core :as ks]
-            [puppetlabs.cthun.protocol :refer [Envelope ISO8601]]
+            [puppetlabs.pcp.protocol :refer [Envelope ISO8601]]
             [schema.core :as s]
             [slingshot.slingshot :refer [try+ throw+]]))
 

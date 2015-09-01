@@ -1,6 +1,6 @@
-(ns puppetlabs.cthun.protocol-test
+(ns puppetlabs.pcp.protocol-test
   (:require [clojure.test :refer :all]
-            [puppetlabs.cthun.protocol :refer :all]
+            [puppetlabs.pcp.protocol :refer :all]
             [puppetlabs.kitchensink.core :as ks]
             [schema.core :as s]))
 

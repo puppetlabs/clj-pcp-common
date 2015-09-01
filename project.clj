@@ -5,9 +5,9 @@
    :password :env/nexus_jenkins_password
    :sign-releases false})
 
-(defproject puppetlabs/cthun-message "0.3.2-SNAPSHOT"
-  :description "Message serialisation codec for cthun"
-  :url "https://github.com/puppetlabs/clj-cthun-message"
+(defproject puppetlabs/pcp-common "0.4.0-SNAPSHOT"
+  :description "Common protocol components for PCP"
+  :url "https://github.com/puppetlabs/clj-pcp-common"
   :license {:name ""
             :url ""}
 
