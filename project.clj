@@ -5,7 +5,7 @@
    :password :env/nexus_jenkins_password
    :sign-releases false})
 
-(defproject puppetlabs/pcp-common "0.4.1-SNAPSHOT"
+(defproject puppetlabs/pcp-common "0.4.1"
   :description "Common protocol components for PCP"
   :url "https://github.com/puppetlabs/clj-pcp-common"
   :license {:name ""
