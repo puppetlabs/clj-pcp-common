@@ -13,10 +13,10 @@
             :message_type ""}
            (dissoc (make-message) :_chunks :id))))
   (testing "it makes a message with parameters"
-    (let [message (make-message :sender "cth://client01.example.com/test"
-                                :targets ["cth:///server"])]
-      (is (= {:sender "cth://client01.example.com/test"
-              :targets ["cth:///server"]
+    (let [message (make-message :sender "pcp://client01.example.com/test"
+                                :targets ["pcp:///server"])]
+      (is (= {:sender "pcp://client01.example.com/test"
+              :targets ["pcp:///server"]
               :expires "1970-01-01T00:00:00.000Z"
               :message_type ""}
            (dissoc message :_chunks :id))))))

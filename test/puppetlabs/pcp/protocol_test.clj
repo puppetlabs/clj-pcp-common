@@ -6,13 +6,13 @@
 
 (deftest uri-schema-test
   (testing "valid uris"
-    (is (= (s/validate Uri "cth:///server") "cth:///server"))
-    (is (= (s/validate Uri "cth://bananas/server") "cth://bananas/server"))
-    (is (= (s/validate Uri "cth://shoes/test") "cth://shoes/test")))
+    (is (= (s/validate Uri "pcp:///server") "pcp:///server"))
+    (is (= (s/validate Uri "pcp://bananas/server") "pcp://bananas/server"))
+    (is (= (s/validate Uri "pcp://shoes/test") "pcp://shoes/test")))
   (testing "invalid uris"
-    (is (thrown? Exception (s/validate Uri "cth://server")))
+    (is (thrown? Exception (s/validate Uri "pcp://server")))
     (is (thrown? Exception (s/validate Uri "server")))
-    (is (thrown? Exception (s/validate Uri "cth://test/with/too_many_slashes")))))
+    (is (thrown? Exception (s/validate Uri "pcp://test/with/too_many_slashes")))))
 
 (deftest uuid?-test
   (is (uuid? (ks/uuid)))
@@ -22,11 +22,11 @@
   (testing "It raises on invalid uris"
     (is (thrown? Exception (explode-uri ""))))
   (testing "It returns component chunks"
-    (is (= [ "localhost" "agent"] (explode-uri "cth://localhost/agent")))
-    (is (= [ "localhost" "*" ] (explode-uri "cth://localhost/*")))
-    (is (= [ "*" "agent" ] (explode-uri "cth://*/agent")))))
+    (is (= [ "localhost" "agent"] (explode-uri "pcp://localhost/agent")))
+    (is (= [ "localhost" "*" ] (explode-uri "pcp://localhost/*")))
+    (is (= [ "*" "agent" ] (explode-uri "pcp://*/agent")))))
 
 (deftest uri-wildcard?-test
-  (is (= true  (uri-wildcard? "cth://*/agent")))
-  (is (= true  (uri-wildcard? "cth://agent01.example.com/*")))
-  (is (= false (uri-wildcard? "cth://agent01.example.com/agent"))))
+  (is (= true  (uri-wildcard? "pcp://*/agent")))
+  (is (= true  (uri-wildcard? "pcp://agent01.example.com/*")))
+  (is (= false (uri-wildcard? "pcp://agent01.example.com/agent"))))

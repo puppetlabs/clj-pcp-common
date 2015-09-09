@@ -9,7 +9,7 @@
 
 (def Uri
   "Schema for Cthun node Uri"
-  (s/pred (partial re-matches #"^cth://[^/]*/[^/]+$") 'uri?))
+  (s/pred (partial re-matches #"^pcp://[^/]*/[^/]+$") 'uri?))
 
 (defn uuid?
   [uuid]
