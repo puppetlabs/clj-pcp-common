@@ -24,7 +24,7 @@
 
 (def FlagSet
   "Schema for the message flags"
-   #{s/Keyword})
+  #{s/Keyword})
 
 ;; string<->byte-array utilities
 
@@ -58,7 +58,7 @@
                   :hours   (t/from-now (t/hours number))
                   :days    (t/from-now (t/days number)))
          expires (tf/unparse (tf/formatters :date-time) expiry)]
-         (set-expiry message expires)))
+     (set-expiry message expires)))
   ([message :- Message timestamp :- ISO8601]
    (assoc message :expires timestamp)))
 
@@ -180,19 +180,19 @@
   [bytes :- ByteArray]
   (let [stream (java.io.ByteArrayInputStream. bytes)
         decoded (try+
-                 (b/decode message-codec stream)
-                 (catch Throwable _
-                   (throw+ {:type ::message-malformed
-                            :message (:message &throw-context)})))]
+                  (b/decode message-codec stream)
+                  (catch Throwable _
+                    (throw+ {:type ::message-malformed
+                             :message (:message &throw-context)})))]
     (if (not (= 1 (get-in (first (:chunks decoded)) [:descriptor :type])))
       (throw+ {:type ::message-invalid
                :message "first chunk should be type 1"}))
     (let [envelope-json (bytes->string (:data (first (:chunks decoded))))
           envelope (try+
-                    (cheshire/decode envelope-json true)
-                    (catch Exception _
-                      (throw+ {:type ::envelope-malformed
-                               :message (:message &throw-context)})))
+                     (cheshire/decode envelope-json true)
+                     (catch Exception _
+                       (throw+ {:type ::envelope-malformed
+                                :message (:message &throw-context)})))
           data-chunk (second (:chunks decoded))
           data-frame (or (:data data-chunk) (byte-array 0))
           data-flags (or (get-in data-chunk [:descriptor :flags]) #{})]
