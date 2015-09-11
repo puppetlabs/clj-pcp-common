@@ -19,7 +19,7 @@
               :targets ["pcp:///server"]
               :expires "1970-01-01T00:00:00.000Z"
               :message_type ""}
-           (dissoc message :_chunks :id))))))
+             (dissoc message :_chunks :id))))))
 
 (deftest set-expiry-test
   (testing "it sets expiries to what you tell it"

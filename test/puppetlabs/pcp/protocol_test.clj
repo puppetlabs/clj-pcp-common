@@ -22,9 +22,9 @@
   (testing "It raises on invalid uris"
     (is (thrown? Exception (explode-uri ""))))
   (testing "It returns component chunks"
-    (is (= [ "localhost" "agent"] (explode-uri "pcp://localhost/agent")))
-    (is (= [ "localhost" "*" ] (explode-uri "pcp://localhost/*")))
-    (is (= [ "*" "agent" ] (explode-uri "pcp://*/agent")))))
+    (is (= ["localhost" "agent"] (explode-uri "pcp://localhost/agent")))
+    (is (= ["localhost" "*"] (explode-uri "pcp://localhost/*")))
+    (is (= ["*" "agent"] (explode-uri "pcp://*/agent")))))
 
 (deftest uri-wildcard?-test
   (is (= true  (uri-wildcard? "pcp://*/agent")))
