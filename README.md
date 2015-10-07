@@ -100,3 +100,9 @@ Returns the network representation of the message
 ```
 
 Returns a message decoded from its network representation
+
+# Support
+
+We use the [Puppet Communications Protocol project on
+JIRA](https://tickets.puppetlabs.com/browse/PCP)
+with the component `clj-pcp-common` for tickets on `puppetlabs/pcp-common`.
