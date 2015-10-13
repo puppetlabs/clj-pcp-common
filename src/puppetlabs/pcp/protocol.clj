@@ -57,6 +57,12 @@
   "Data schema for http://puppetlabs.com/ttl_expired"
   {:id MessageId})
 
+(def VersionErrorMessage
+  "Data schema for http://puppetlabs.com/version_error"
+  {:id MessageId
+   :target s/Str
+   :reason s/Str})
+
 (def DebugChunk
   "Data schema for a debug chunk"
   {:hops [{(s/required-key :server) Uri
