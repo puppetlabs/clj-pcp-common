@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/puppetlabs/clj-pcp-common.png?branch=master)](https://travis-ci.org/puppetlabs/clj-pcp-common)
+
 ## clj-pcp-common
 
 PCP message codec and protocol helpers
