@@ -1,3 +1,14 @@
+## 0.5.0
+
+This is a feature release.
+
+This is the first public release to clojars.
+
+* [PCP-42](https://tickets.puppetlabs.com/browse/PCP-42) Added schema for
+  `http://puppetlabs.com/version_error` message bodies.
+* [PCP-45](https://tickets.puppetlabs.com/browse/PCP-45) Release to clojars
+  rather than internal nexus servers.
+
 ## 0.4.1
 
 This is a maintenance release
