@@ -1,10 +1,3 @@
-(defn deploy-info
-  [url]
-  {:url url
-   :username :env/nexus_jenkins_username
-   :password :env/nexus_jenkins_password
-   :sign-releases false})
-
 (defproject puppetlabs/pcp-common "0.4.2-SNAPSHOT"
   :description "Common protocol components for PCP"
   :url "https://github.com/puppetlabs/clj-pcp-common"
@@ -42,9 +35,10 @@
 
   :aliases {"cljfmt" ["with-profile" "+cljfmt" "cljfmt"]}
 
-  :repositories [["releases" "http://nexus.delivery.puppetlabs.net/content/repositories/releases/"]
-                 ["snapshots"  "http://nexus.delivery.puppetlabs.net/content/repositories/snapshots/"]]
+  :deploy-repositories [["releases" {:url "https://clojars.org/repo"
+                                     :username :env/clojars_jenkins_username
+                                     :password :env/clojars_jenkins_password
+                                     :sign-releases false}]]
 
-  :deploy-repositories [["releases" ~(deploy-info "http://nexus.delivery.puppetlabs.net/content/repositories/releases/")]
-                        ["snapshots" ~(deploy-info "http://nexus.delivery.puppetlabs.net/content/repositories/snapshots/")]]
-  :lein-release {:scm :git, :deploy-via :lein-deploy})
+  :lein-release {:scm :git
+                 :deploy-via :lein-deploy})
