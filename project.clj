@@ -24,9 +24,12 @@
                  [org.clojars.smee/binary "0.3.0"]
 
                  ;; try+/throw+
-                 [slingshot "0.12.2"]]
+                 [slingshot "0.12.2"]
 
-  :plugins [[lein-release "1.0.5" :exclusions [org.clojure/clojure]]]
+                 [puppetlabs/i18n "0.3.0"]]
+
+  :plugins [[lein-release "1.0.5" :exclusions [org.clojure/clojure]]
+            [puppetlabs/i18n "0.3.0"]]
 
   :profiles {:cljfmt {:plugins [[lein-cljfmt "0.3.0"]
                                 [lein-parent "0.2.1"]]
