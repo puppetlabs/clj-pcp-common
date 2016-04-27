@@ -13,8 +13,14 @@ project as a dependency in your leiningen project file:
 
 [![Clojars Project](http://clojars.org/puppetlabs/pcp-common/latest-version.svg)](http://clojars.org/puppetlabs/pcp-common)
 
-## Support
+## Maintenance
 
-We use the [Puppet Communications Protocol project on
-JIRA](https://tickets.puppetlabs.com/browse/PCP)
-with the component `clj-pcp-common` for tickets on `puppetlabs/pcp-common`.
+Maintainers: Alessandro Parisi <alessandro@puppet.com>, Michael Smith
+<michael.smith@puppet.com>, Michal Ruzicka <michal.ruzicka@puppet.com>.
+
+Contributing: Please refer to [this][contributing] document.
+
+Tickets: File bug tickets at https://tickets.puppet.com/browse/PCP and add the
+`clj-pcp-common` component to the ticket.
+
+[contributing]: CONTRIBUTING.md
