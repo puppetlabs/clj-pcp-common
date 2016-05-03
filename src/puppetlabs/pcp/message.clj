@@ -6,7 +6,8 @@
             [puppetlabs.kitchensink.core :as ks]
             [puppetlabs.pcp.protocol :refer [Envelope ISO8601]]
             [schema.core :as s]
-            [slingshot.slingshot :refer [try+ throw+]]))
+            [slingshot.slingshot :refer [try+ throw+]]
+            [puppetlabs.i18n.core :as i18n]))
 
 ;; schemas for message validation
 (def Message
@@ -186,7 +187,7 @@
                              :message (:message &throw-context)})))]
     (if (not (= 1 (get-in (first (:chunks decoded)) [:descriptor :type])))
       (throw+ {:type ::message-invalid
-               :message "first chunk should be type 1"}))
+               :message (i18n/trs "first chunk should be type 1")}))
     (let [envelope-json (bytes->string (:data (first (:chunks decoded))))
           envelope (try+
                      (cheshire/decode envelope-json true)
