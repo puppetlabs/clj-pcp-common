@@ -69,12 +69,12 @@
            (s/optional-key :stage) s/Str
            (s/required-key :time) ISO8601}]})
 
-(s/defn ^:always-validate explode-uri :- [s/Str]
+(s/defn explode-uri :- [s/Str]
   "Parse an Uri string into its component parts.  Raises if incomplete"
   [uri :- Uri]
   (str/split (subs uri 6) #"/"))
 
-(s/defn ^:always-validate uri-wildcard? :- s/Bool
+(s/defn uri-wildcard? :- s/Bool
   [uri :- Uri]
   (let [chunks (explode-uri uri)]
     (some? (some (partial = "*") chunks))))

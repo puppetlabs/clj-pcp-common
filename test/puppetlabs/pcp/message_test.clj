@@ -1,9 +1,11 @@
 (ns puppetlabs.pcp.message-test
   (:require [clojure.test :refer :all]
             [puppetlabs.pcp.message :refer :all]
-            [puppetlabs.kitchensink.core :as ks]
+            [slingshot.test]
             [schema.core :as s]
-            [slingshot.test]))
+            [schema.test :as st]))
+
+(use-fixtures :once st/validate-schemas)
 
 (deftest make-message-test
   (testing "it makes a message"

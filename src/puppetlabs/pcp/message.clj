@@ -51,7 +51,7 @@
   {:deprecated "0.2.0"}
   [message] (message->envelope message))
 
-(s/defn ^:always-validate set-expiry :- Message
+(s/defn set-expiry :- Message
   "Returns a message with new expiry"
   ([message :- Message number :- s/Int unit :- s/Keyword]
    (let [expiry (condp = unit
@@ -63,17 +63,17 @@
   ([message :- Message timestamp :- ISO8601]
    (assoc message :expires timestamp)))
 
-(s/defn ^:always-validate get-data :- ByteArray
+(s/defn get-data :- ByteArray
   "Returns the data from the data frame"
   [message :- Message]
   (get-in message [:_chunks :data :data] (byte-array 0)))
 
-(s/defn ^:always-validate get-debug :- ByteArray
+(s/defn get-debug :- ByteArray
   "Returns the data from the debug frame"
   [message :- Message]
   (get-in message [:_chunks :debug :data] (byte-array 0)))
 
-(s/defn ^:always-validate set-data :- Message
+(s/defn set-data :- Message
   "Sets the data for the data frame"
   ([message :- Message data :- ByteArray] (set-data message data #{}))
   ([message :- Message data :- ByteArray flags :- FlagSet]
@@ -81,7 +81,7 @@
                                                     :flags flags}
                                        :data data})))
 
-(s/defn ^:always-validate set-debug :- Message
+(s/defn set-debug :- Message
   "Sets the data for the debug frame"
   ([message :- Message data :- ByteArray] (set-debug message data #{}))
   ([message :- Message data :- ByteArray flags :- FlagSet]
@@ -89,31 +89,31 @@
                                                      :flags flags}
                                         :data data})))
 
-(s/defn ^:always-validate get-json-data :- s/Any
+(s/defn get-json-data :- s/Any
   "Returns the data from the data frame decoded from json"
   [message :- Message]
   (let [data (get-data message)
         decoded (cheshire/parse-string (bytes->string data) true)]
     decoded))
 
-(s/defn ^:always-validate get-json-debug :- s/Any
+(s/defn get-json-debug :- s/Any
   "Returns the data from the debug frame decoded from json"
   [message :- Message]
   (let [data (get-debug message)
         decoded (cheshire/parse-string (bytes->string data) true)]
     decoded))
 
-(s/defn ^:always-validate set-json-data :- Message
+(s/defn set-json-data :- Message
   "Sets the data to be the json byte-array version of data"
   [message :- Message data :- s/Any]
   (set-data message (string->bytes (cheshire/generate-string data))))
 
-(s/defn ^:always-validate set-json-debug :- Message
+(s/defn set-json-debug :- Message
   "Sets the debug data to be the json byte-array version of data"
   [message :- Message data :- s/Any]
   (set-debug message (string->bytes (cheshire/generate-string data))))
 
-(s/defn ^:always-validate make-message :- Message
+(s/defn make-message :- Message
   "Returns a new empty message structure"
   [& args]
   (let [message (into {:id (ks/uuid)
@@ -176,7 +176,7 @@
     (b/encode message-codec stream {:chunks chunks})
     (.toByteArray stream)))
 
-(s/defn ^:always-validate decode :- Message
+(s/defn decode :- Message
   "Returns a message object from a network format message"
   [bytes :- ByteArray]
   (let [stream (java.io.ByteArrayInputStream. bytes)
