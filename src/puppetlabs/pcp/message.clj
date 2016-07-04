@@ -198,7 +198,7 @@
           data-frame (or (:data data-chunk) (byte-array 0))
           data-flags (or (get-in data-chunk [:descriptor :flags]) #{})]
       (try+ (s/validate Envelope envelope)
-            (catch Throwable _
+            (catch Object _
               (throw+ {:type ::envelope-invalid
                        :message (:message &throw-context)})))
       (let [message (set-data (merge (make-message) envelope) data-frame data-flags)]
