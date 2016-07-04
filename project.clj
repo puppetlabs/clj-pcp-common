@@ -1,3 +1,5 @@
+(def i18n-version "0.4.1")
+
 (defproject puppetlabs/pcp-common "0.5.1-SNAPSHOT"
   :description "Common protocol components for PCP"
   :url "https://github.com/puppetlabs/clj-pcp-common"
@@ -26,10 +28,10 @@
                  ;; try+/throw+
                  [slingshot "0.12.2"]
 
-                 [puppetlabs/i18n "0.3.0"]]
+                 [puppetlabs/i18n ~i18n-version]]
 
   :plugins [[lein-release "1.0.5" :exclusions [org.clojure/clojure]]
-            [puppetlabs/i18n "0.3.0"]]
+            [puppetlabs/i18n ~i18n-version]]
 
   :profiles {:cljfmt {:plugins [[lein-cljfmt "0.3.0"]
                                 [lein-parent "0.2.1"]]
