@@ -1,9 +1,11 @@
 (ns puppetlabs.pcp.message-test
   (:require [clojure.test :refer :all]
             [puppetlabs.pcp.message :refer :all]
-            [puppetlabs.kitchensink.core :as ks]
+            [slingshot.test]
             [schema.core :as s]
-            [slingshot.test]))
+            [schema.test :as st]))
+
+(use-fixtures :once st/validate-schemas)
 
 (deftest make-message-test
   (testing "it makes a message"
@@ -73,10 +75,11 @@
 
 (deftest encode-test
   (testing "when being strict, we take a Message only"
-    (s/with-fn-validation
-      (is (thrown+? [:type :schema.core/error]
-                    (encode {}))
-          "Rejected an empty map as a Message")))
+    (is (thrown+? [:type :schema.core/error]
+                  (encode {}))
+        "Rejected an empty map as a Message"))
+  ;; don't include the envelope in the encoded messages in the following
+  ;; tests for the sake of brevity
   (with-redefs [message->envelope (constantly {})]
     (testing "it returns a byte array"
       ;; subsequent tests will use vec to ignore this
@@ -100,43 +103,46 @@
              (vec (encode (set-data (make-message) (string->bytes "haha")))))))))
 
 (deftest decode-test
-  (with-redefs [schema.core/validate (fn [s d] d)]
-    (testing "it only handles version 1 messages"
-      (is (thrown+? [:type :puppetlabs.pcp.message/message-malformed]
-                    (decode (byte-array [2])))))
-    (testing "it insists on envelope chunk first"
-      (is (thrown+? [:type :puppetlabs.pcp.message/message-invalid]
-                    (decode (byte-array [1,
-                                         2, 0 0 0 2, 123 125])))))
-    (testing "it decodes the null message"
-      (is (= (dissoc (message->envelope (make-message)) :id)
-             (dissoc (message->envelope (decode (byte-array [1, 1, 0 0 0 2, 123 125]))) :id))))
-    (testing "it insists on a well-formed envelope"
-      (is (thrown+? [:type :puppetlabs.pcp.message/envelope-malformed]
-                    (decode (byte-array [1,
-                                         1, 0 0 0 1, 123])))))
-    (testing "it insists on a complete envelope"
-      (with-redefs [schema.core/validate (fn [s d] (throw (Exception. "oh dear")))]
-        (is (thrown+? [:type :puppetlabs.pcp.message/envelope-invalid]
-                      (decode (byte-array [1,
-                                           1, 0 0 0 2, 123 125]))))))
-    (testing "data is accessible"
-      (let [message (decode (byte-array [1,
-                                         1, 0 0 0 2, 123 125,
-                                         2, 0 0 0 3, 108 111 108]))]
-        (is (= (String. (get-data message)) "lol"))))
-    (testing "debug is accessible"
-      (let [message (decode (byte-array [1,
-                                         1, 0 0 0 2, 123 125,
-                                         2, 0 0 0 0,
-                                         3, 0 0 0 3, 108 111 108]))]
-        (is (= "lol" (String. (get-debug message))))))))
+  (testing "it only handles version 1 messages"
+    (is (thrown+? [:type :puppetlabs.pcp.message/message-malformed]
+                  (decode (byte-array [2])))))
+  (testing "it insists on envelope chunk first"
+    (is (thrown+? [:type :puppetlabs.pcp.message/message-invalid]
+                  (decode (byte-array [1,
+                                       2, 0 0 0 2, 123 125])))))
+  (testing "it insists on a well-formed envelope"
+    (is (thrown+? [:type :puppetlabs.pcp.message/envelope-malformed]
+                  (decode (byte-array [1,
+                                       1, 0 0 0 1, 123])))))
+  (testing "it insists on a complete envelope"
+    (is (thrown+? [:type :puppetlabs.pcp.message/envelope-invalid]
+                  (decode (byte-array [1,
+                                       1, 0 0 0 2, 123 125])))))
+  ;; disable schema validations (both signature validations and explicit
+  ;; calls to `schema.core/validate`) for the following tests as the byte
+  ;; arrays used in them don't match the expected schemas for the sake
+  ;; of brevity
+  (s/without-fn-validation
+    (with-redefs [schema.core/validate (fn [_ v] v)]
+      (testing "it decodes the null message"
+        (is (= (dissoc (message->envelope (make-message)) :id)
+               (dissoc (message->envelope (decode (byte-array [1, 1, 0 0 0 2, 123 125]))) :id))))
+      (testing "data is accessible"
+        (let [message (decode (byte-array [1,
+                                           1, 0 0 0 2, 123 125,
+                                           2, 0 0 0 3, 108 111 108]))]
+          (is (= "lol" (String. (get-data message))))))
+      (testing "debug is accessible"
+        (let [message (decode (byte-array [1,
+                                           1, 0 0 0 2, 123 125,
+                                           2, 0 0 0 0,
+                                           3, 0 0 0 3, 108 111 108]))]
+          (is (= "lol" (String. (get-debug message)))))))))
 
 (deftest encoder-roundtrip-test
-  (with-redefs [schema.core/validate (fn [s d] d)]
-    (testing "it can roundtrip data"
-      (let [data (byte-array (map byte "hola"))
-            encoded (encode (set-data (make-message) data))
-            decoded (decode encoded)]
-        (is (= (vec (get-data decoded))
-               (vec data)))))))
+  (testing "it can roundtrip data"
+    (let [data (byte-array (map byte "hola"))
+          encoded (encode (set-data (make-message :sender "pcp://client01.example.com/test") data))
+          decoded (decode encoded)]
+      (is (= (vec (get-data decoded))
+             (vec data))))))

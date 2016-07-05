@@ -2,7 +2,10 @@
   (:require [clojure.test :refer :all]
             [puppetlabs.pcp.protocol :refer :all]
             [puppetlabs.kitchensink.core :as ks]
-            [schema.core :as s]))
+            [schema.core :as s]
+            [schema.test :as st]))
+
+(use-fixtures :once st/validate-schemas)
 
 (deftest uri-schema-test
   (testing "valid uris"
