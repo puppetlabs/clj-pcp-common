@@ -86,15 +86,15 @@
       (is (= (class (byte-array 0))
              (class (encode (make-message))))))
     (testing "it encodes a message"
-      (is (= [1,
-              1, 0 0 0 2, 123 125,
-              2, 0 0 0 0]
+      (is (= [1,                    ; PCP version
+              1, 0 0 0 2, 123 125,  ; envelope chunk: chunk type, content size, content
+              2, 0 0 0 0]           ; data chunk: chunk type, content size
              (vec (encode (make-message))))))
     (testing "it adds debug type as an optional final chunk"
-      (is (= [1,
-              1, 0 0 0 2, 123 125,
-              2, 0 0 0 0,
-              3, 0 0 0 4, 115 111 109 101]
+      (is (= [1,                            ; PCP version
+              1, 0 0 0 2, 123 125,          ; envelope chunk
+              2, 0 0 0 0,                   ; data chunk
+              3, 0 0 0 4, 115 111 109 101]  ; debug chunk: chunk type, content size, content
              (vec (encode (set-debug (make-message) (string->bytes "some")))))))
     (testing "it encodes the data chunk"
       (is (= [1,
