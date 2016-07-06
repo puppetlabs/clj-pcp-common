@@ -8,7 +8,7 @@
   (s/pred ks/datetime? 'datetime?))
 
 (def Uri
-  "Schema for Cthun node Uri"
+  "Schema for PCP node Uri"
   (s/pred (partial re-matches #"^pcp://[^/]*/[^/]+$") 'uri?))
 
 (defn uuid?
@@ -37,7 +37,7 @@
 
 (def InventoryRequest
   "Data schema for http://puppetlabs.com/inventory_request"
-  {:query [s/Str]})
+  {:query [Uri]})
 
 (def InventoryResponse
   "Data schema for http://puppetlabs.com/inventory_response"
