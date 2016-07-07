@@ -1,3 +1,15 @@
+## 0.5.1
+
+This is a maintenance release
+
+* [PCP-367](https://tickets.puppetlabs.com/browse/PCP-367) Add i18n library
+  and mark text strings for extraction.
+* [PCP-467](https://tickets.puppetlabs.com/browse/PCP-467) Disable Prismatic
+  Schema validation by default.
+* [PCP-483](https://tickets.puppetlabs.com/browse/PCP-483) Fix InventoryRequest
+  schema. It was overly broad in relation to the definition at
+  pcp-specifications.
+
 ## 0.5.0
 
 This is a feature release.
