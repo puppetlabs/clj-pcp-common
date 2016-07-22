@@ -14,10 +14,10 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/tools.logging "0.3.1"]
 
-                 [puppetlabs/kitchensink "1.1.0"]
+                 [puppetlabs/kitchensink "1.3.0"]
 
                  [cheshire "5.5.0"]
-                 [prismatic/schema "0.4.3"]
+                 [prismatic/schema "1.0.4"]
 
                  [clj-time "0.9.0"]
 
