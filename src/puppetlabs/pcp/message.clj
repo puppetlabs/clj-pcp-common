@@ -166,6 +166,7 @@
 
 (s/defn encode :- ByteArray
   [message :- Message]
+  (s/validate Message message)
   (let [stream (java.io.ByteArrayOutputStream.)
         envelope (string->bytes (cheshire/generate-string (message->envelope message)))
         chunks (into []

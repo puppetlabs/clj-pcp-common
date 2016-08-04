@@ -5,14 +5,13 @@
             [schema.core :as s]
             [schema.test :as st]))
 
-(use-fixtures :once st/validate-schemas)
-
 (deftest uri-schema-test
   (testing "valid uris"
     (is (= (s/validate Uri "pcp:///server") "pcp:///server"))
     (is (= (s/validate Uri "pcp://bananas/server") "pcp://bananas/server"))
     (is (= (s/validate Uri "pcp://shoes/test") "pcp://shoes/test")))
   (testing "invalid uris"
+    (is (thrown? Exception (s/validate Uri "")))
     (is (thrown? Exception (s/validate Uri "pcp://server")))
     (is (thrown? Exception (s/validate Uri "server")))
     (is (thrown? Exception (s/validate Uri "pcp://test/with/too_many_slashes")))))
