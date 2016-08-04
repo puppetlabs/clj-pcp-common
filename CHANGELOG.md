@@ -1,3 +1,14 @@
+## 0.5.2
+
+This is a maintenance release
+
+* [PCP-525](https://tickets.puppetlabs.com/browse/PCP-525) Explicitly
+  validate the Message argument of the message/encode function.
+* [PCP-535](https://tickets.puppetlabs.com/browse/PCP-535) Don't run tests
+  with schema validation enabled.
+* [PR #26](https://github.com/puppetlabs/clj-pcp-common/pull/26) Update
+  dependencies to be consistent with upstream projects.
+
 ## 0.5.1
 
 This is a maintenance release
