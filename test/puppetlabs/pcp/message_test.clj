@@ -5,8 +5,6 @@
             [schema.core :as s]
             [schema.test :as st]))
 
-(use-fixtures :once st/validate-schemas)
-
 (deftest make-message-test
   (testing "the created message is a Message"
     (is (s/validate Message (make-message))))
