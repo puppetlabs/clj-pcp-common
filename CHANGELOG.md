@@ -1,3 +1,9 @@
+## 0.5.3
+
+This is a maintenance release
+
+* Updates clj-i18n to 0.4.2 for a performance-related bug fix
+
 ## 0.5.2
 
 This is a maintenance release
