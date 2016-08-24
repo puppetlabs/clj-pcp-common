@@ -1,4 +1,4 @@
-(def i18n-version "0.4.1")
+(def i18n-version "0.4.2")
 
 (defproject puppetlabs/pcp-common "0.5.3-SNAPSHOT"
   :description "Common protocol components for PCP"
