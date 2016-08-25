@@ -1,3 +1,9 @@
+## 0.5.4
+
+This is a maintenance release
+
+* Updates clj-i18n to 0.4.3 for a bug introduced in 0.4.2
+
 ## 0.5.3
 
 This is a maintenance release
