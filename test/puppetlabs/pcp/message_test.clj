@@ -5,6 +5,10 @@
             [schema.core :as s]
             [schema.test :as st]))
 
+(deftest byte-array-conversion-test
+  (testing "byte array round trip conversion"
+    (is (= "☃" (-> "☃" string->bytes bytes->string)))))
+
 (deftest make-message-test
   (testing "the created message is a Message"
     (is (s/validate Message (make-message))))

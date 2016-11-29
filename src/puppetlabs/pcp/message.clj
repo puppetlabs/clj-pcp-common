@@ -7,7 +7,8 @@
             [puppetlabs.pcp.protocol :refer [Envelope ISO8601]]
             [schema.core :as s]
             [slingshot.slingshot :refer [try+ throw+]]
-            [puppetlabs.i18n.core :as i18n]))
+            [puppetlabs.i18n.core :as i18n])
+  (:import [java.nio.charset Charset]))
 
 ;; schemas for message validation
 (def Message
@@ -21,23 +22,27 @@
 
 (def ByteArray
   "Schema for a byte-array"
-  (class (byte-array 0)))
+  bytes)
 
 (def FlagSet
   "Schema for the message flags"
   #{s/Keyword})
 
-;; string<->byte-array utilities
+;; string <-> byte-array utilities
 
-(defn string->bytes
+(def ^Charset conversion-charset
+  "Charset used for the string <-> byte-array conversions"
+  (Charset/forName "UTF-8"))
+
+(defn ^bytes string->bytes
   "Returns an array of bytes from a string"
-  [s]
-  (byte-array (map byte s)))
+  [^String s]
+  (.getBytes s conversion-charset))
 
-(defn bytes->string
+(defn ^String bytes->string
   "Returns a string given a byte-array"
-  [bytes]
-  (String. bytes))
+  [^bytes bytes]
+  (String. bytes conversion-charset))
 
 ;; abstract message manipulation
 (s/defn message->envelope :- Envelope
