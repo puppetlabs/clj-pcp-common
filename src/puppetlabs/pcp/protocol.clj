@@ -22,12 +22,19 @@
 (def Envelope
   "Defines the envelope format of a v2 message"
   {:id           MessageId
-   (s/optional-key :in-reply-to) MessageId
-   :sender       Uri
-   :targets      [Uri]
    :message_type s/Str
-   :expires      ISO8601
-   (s/optional-key :destination_report) s/Bool})
+   :target      [Uri]
+   :sender       Uri
+   (s/optional-key :data) (s/maybe s/Any)
+   (s/optional-key :in_reply_to) MessageId})
+
+(def v1-Envelope
+  "Defines the envelope format of a v1 message"
+  {:id           MessageId
+   :message_type s/Str
+   :targets      [Uri]
+   :sender       Uri
+   (s/optional-key :in_reply_to) MessageId})
 
 (def AssociateResponse
   "Schema for http://puppetlabs.com/associate_response"
@@ -37,16 +44,18 @@
 
 (def InventoryRequest
   "Data schema for http://puppetlabs.com/inventory_request"
-  {:query [Uri]})
+  {:query [Uri]
+   (s/optional-key :subscribe) s/Bool})
 
 (def InventoryResponse
   "Data schema for http://puppetlabs.com/inventory_response"
-  {:uris [Uri]})
+  {:uris [Uri]
+   :version s/Int})
 
 (def DestinationReport
   "Defines the data field for a destination report body"
   {:id MessageId
-   :targets [Uri]})
+   :target [Uri]})
 
 (def ErrorMessage
   "Data schema for http://puppetlabs.com/error_message"
