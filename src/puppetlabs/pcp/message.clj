@@ -138,6 +138,10 @@
    2r0010 :unused3
    2r0001 :unused4})
 
+;; a var which is bound to the PCP message's length before its decoding
+;; the value is used to validate the lengths of the PCP message chunks
+(def ^:private ^:dynamic *message-data-length*)
+
 (defn encode-descriptor
   "Returns a binary representation of a chunk descriptor"
   [type]
@@ -159,10 +163,20 @@
 (def descriptor-codec
   (b/compile-codec :byte encode-descriptor decode-descriptor))
 
+(def length-codec
+  (b/compile-codec :int-be
+                   identity
+                   (fn [l]
+                     (if (or (neg? l) (>= l *message-data-length*))
+                       (throw
+                         (IllegalArgumentException.
+                           (str "Invalid chunk length: " l " (should be between 0 and " *message-data-length* ")"))))
+                     l)))
+
 (def chunk-codec
   (b/ordered-map
    :descriptor descriptor-codec
-   :data (b/blob :prefix :int-be)))
+   :data (b/blob :prefix length-codec)))
 
 (def message-codec
   (b/ordered-map
@@ -187,7 +201,8 @@
   [bytes :- ByteArray]
   (let [stream (java.io.ByteArrayInputStream. bytes)
         decoded (try+
-                  (b/decode message-codec stream)
+                  (binding [*message-data-length* (alength bytes)]
+                    (b/decode message-codec stream))
                   (catch Throwable _
                     (throw+ {:type ::message-malformed
                              :message (:message &throw-context)})))]
