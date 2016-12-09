@@ -122,6 +122,17 @@
     (is (thrown+? [:type :puppetlabs.pcp.message/envelope-invalid]
                   (decode (byte-array [1,
                                        1, 0 0 0 2, 123 125])))))
+  (testing "it validates the chunk lengths"
+    (is (thrown+-with-msg? [:type :puppetlabs.pcp.message/message-malformed]
+                           #":message \"Invalid chunk length: -1 \(should be between 0 and 13\)\""
+                           (decode (byte-array [1,
+                                                1, 0 0 0 2, 123 125,
+                                                2, -1 -1 -1 -1]))))
+    (is (thrown+-with-msg? [:type :puppetlabs.pcp.message/message-malformed]
+                           #":message \"Invalid chunk length: 5000 \(should be between 0 and 14\)\""
+                           (decode (byte-array [1,
+                                                1, 0 0 0 2, 123 125,
+                                                2, 0 0 19 136, 0])))))
   ;; disable schema validations (both signature validations and explicit
   ;; calls to `schema.core/validate`) for the following tests as the byte
   ;; arrays used in them don't match the expected schemas for the sake
