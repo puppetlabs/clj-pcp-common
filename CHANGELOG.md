@@ -1,3 +1,10 @@
+## 0.5.5
+
+This is a maintenance release
+
+* [PCP-620](https://tickets.puppetlabs.com/browse/PCP-620) Validate chunk
+  lengths when decoding to prevent DOS
+
 ## 0.5.4
 
 This is a maintenance release
