@@ -134,6 +134,10 @@
   (let [target-kwd (if (= "v2.0" version)
                      :target
                      :targets)
+        target (if (= "v2.0" version)
+                 (first target)
+                 target)
+        target-schema (if (= "v2.0" version) Message v1-Message)
         add-data-fn (if (= "v2.0" version)
                       (fn [message]
                         (cond-> message
@@ -142,13 +146,15 @@
                       (fn [message]
                         (cond-> message
                           data (set-json-data data))))]
-    (cond-> (make-message)
-      true (rename-keys {:target target-kwd})
-      target (assoc target-kwd target)
-      message_type (assoc :message_type message_type)
-      sender (assoc :sender sender)
-      in_reply_to (assoc :in_reply_to in_reply_to)
-      true add-data-fn)))
+    (s/validate target-schema
+                (cond-> (make-message)
+                  true (rename-keys {:target target-kwd})
+                  target (assoc target-kwd target)
+                  (not target) (dissoc :target) ;; TODO something better here.
+                  message_type (assoc :message_type message_type)
+                  sender (assoc :sender sender)
+                  in_reply_to (assoc :in_reply_to in_reply_to)
+                  true add-data-fn))))
 
 ;; message encoding/codecs
 
@@ -190,8 +196,9 @@
    :chunks (b/repeated chunk-codec)))
 
 (s/defn encode :- ByteArray
+  "Convert a text json message to a v1-formatted byte array."
   [message]
-  (s/validate (s/either Message v1-Message) message)
+  (s/validate v1-Message message)
   (let [stream (java.io.ByteArrayOutputStream.)
         envelope (string->bytes (cheshire/generate-string (message->envelope message)))
         chunks (into []
@@ -205,7 +212,8 @@
 ;; TODO change the approach with envelope-schema
 
 (s/defn decode :- Message
-  "Returns a message object from a network format message"
+  "Returns a message object from a network format message. Convert a v1
+   binary-serialized message to a json representation."
   [bytes]
   (let [stream (java.io.ByteArrayInputStream. bytes)
         decoded (try+
@@ -234,7 +242,8 @@
         envelope
         (let [message (set-data (merge (make-versioned-message
                                          "v1.0"
-                                         {:target [] :message_type ""
+                                         {:target []
+                                          :message_type ""
                                           :sender ""})
                                        envelope)
                                 data-frame data-flags)]

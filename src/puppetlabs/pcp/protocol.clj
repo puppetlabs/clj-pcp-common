@@ -23,8 +23,8 @@
   "Defines the envelope format of a v2 message"
   {:id           MessageId
    :message_type s/Str
-   :target      [Uri]
    :sender       Uri
+   (s/optional-key :target)       Uri
    (s/optional-key :data) (s/maybe s/Any)
    (s/optional-key :in_reply_to) MessageId})
 
@@ -51,11 +51,6 @@
   "Data schema for http://puppetlabs.com/inventory_response"
   {:uris [Uri]
    :version s/Int})
-
-(def DestinationReport
-  "Defines the data field for a destination report body"
-  {:id MessageId
-   :target [Uri]})
 
 (def ErrorMessage
   "Data schema for http://puppetlabs.com/error_message"
