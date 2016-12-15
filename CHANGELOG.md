@@ -1,3 +1,10 @@
+## 1.0.0
+
+This is a major feature release introducing PCP v2. It continues to support PCP
+v1, but breaks API compatibility for those using this library.
+
+* [PCP-645](https://tickets.puppetlabs.com/browse/PCP-645) Add PCP v2 protocol
+
 ## 0.5.5
 
 This is a maintenance release

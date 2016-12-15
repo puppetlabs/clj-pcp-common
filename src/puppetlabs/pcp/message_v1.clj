@@ -207,20 +207,20 @@
   [bytes :- ByteArray]
   (let [stream (java.io.ByteArrayInputStream. bytes)
         decoded (try+
-                  (binding [*message-data-length* (alength bytes)]
-                    (b/decode message-codec stream))
-                  (catch Throwable _
-                    (throw+ {:type ::message-malformed
-                             :message (:message &throw-context)})))]
+                 (binding [*message-data-length* (alength bytes)]
+                   (b/decode message-codec stream))
+                 (catch Throwable _
+                   (throw+ {:type ::message-malformed
+                            :message (:message &throw-context)})))]
     (if (not (= 1 (get-in (first (:chunks decoded)) [:descriptor :type])))
       (throw+ {:type ::message-invalid
                :message (i18n/trs "first chunk should be type 1")}))
     (let [envelope-json (bytes->string (:data (first (:chunks decoded))))
           envelope (try+
-                     (cheshire/decode envelope-json true)
-                     (catch Exception _
-                       (throw+ {:type ::envelope-malformed
-                                :message (:message &throw-context)})))
+                    (cheshire/decode envelope-json true)
+                    (catch Exception _
+                      (throw+ {:type ::envelope-malformed
+                               :message (:message &throw-context)})))
           data-chunk (second (:chunks decoded))
           data-frame (or (:data data-chunk) empty-byte-array)
           data-flags (or (get-in data-chunk [:descriptor :flags]) #{})]
