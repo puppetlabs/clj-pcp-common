@@ -97,16 +97,16 @@
 (s/defn get-json-data :- s/Any
   "Returns the data from the data frame decoded from json"
   [message :- Message]
-  (let [data (get-data message)
-        decoded (cheshire/parse-string (bytes->string data) true)]
-    decoded))
+  (-> (get-data message)
+      bytes->string
+      (cheshire/parse-string true)))
 
 (s/defn get-json-debug :- s/Any
   "Returns the data from the debug frame decoded from json"
   [message :- Message]
-  (let [data (get-debug message)
-        decoded (cheshire/parse-string (bytes->string data) true)]
-    decoded))
+  (-> (get-debug message)
+      bytes->string
+      (cheshire/parse-string true)))
 
 (s/defn set-json-data :- Message
   "Sets the data to be the json byte-array version of data"
