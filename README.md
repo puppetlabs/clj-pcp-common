@@ -4,7 +4,10 @@
 
 PCP message codec and protocol helpers
 
-https://github.com/puppetlabs/pcp-specifications
+    https://github.com/puppetlabs/pcp-specifications
+
+It supports PCP v1 and v2 via the `message-v1` and `message-v2` namespaces. The `protocol` namespace defines a common
+definition for both versions of the protocol; note that some message types have been removed from v2.
 
 ## Installation
 

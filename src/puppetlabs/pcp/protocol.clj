@@ -19,8 +19,17 @@
   "A message identifier"
   (s/pred uuid?))
 
-(def Envelope
+(def v2-Envelope
   "Defines the envelope format of a v2 message"
+  {:id           MessageId
+   :message_type s/Str
+   (s/optional-key :target) Uri
+   (s/optional-key :sender) Uri
+   (s/optional-key :in_reply_to) MessageId
+   (s/optional-key :data) s/Any})
+
+(def v1-Envelope
+  "Defines the envelope format of a v1 message"
   {:id           MessageId
    (s/optional-key :in-reply-to) MessageId
    :sender       Uri
@@ -37,7 +46,8 @@
 
 (def InventoryRequest
   "Data schema for http://puppetlabs.com/inventory_request"
-  {:query [Uri]})
+  {:query [Uri]
+   (s/optional-key :subscribe) s/Bool})
 
 (def InventoryResponse
   "Data schema for http://puppetlabs.com/inventory_response"

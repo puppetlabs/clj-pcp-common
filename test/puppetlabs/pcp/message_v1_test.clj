@@ -1,6 +1,6 @@
-(ns puppetlabs.pcp.message-test
+(ns puppetlabs.pcp.message-v1-test
   (:require [clojure.test :refer :all]
-            [puppetlabs.pcp.message :refer :all]
+            [puppetlabs.pcp.message-v1 :refer :all]
             [slingshot.test]
             [schema.core :as s]
             [schema.test :as st]))
@@ -18,6 +18,14 @@
             :expires "1970-01-01T00:00:00.000Z"
             :message_type ""}
            (dissoc (make-message) :_chunks :id))))
+  (testing "it makes a message with a map of parameters"
+    (let [message (make-message {:sender "pcp://client01.example.com/test"
+                                 :targets ["pcp:///server"]})]
+      (is (= {:sender "pcp://client01.example.com/test"
+              :targets ["pcp:///server"]
+              :expires "1970-01-01T00:00:00.000Z"
+              :message_type ""}
+             (dissoc message :_chunks :id)))))
   (testing "it makes a message with parameters"
     (let [message (make-message :sender "pcp://client01.example.com/test"
                                 :targets ["pcp:///server"])]
@@ -108,27 +116,27 @@
 
 (deftest decode-test
   (testing "it only handles version 1 messages"
-    (is (thrown+? [:type :puppetlabs.pcp.message/message-malformed]
+    (is (thrown+? [:type :puppetlabs.pcp.message-v1/message-malformed]
                   (decode (byte-array [2])))))
   (testing "it insists on envelope chunk first"
-    (is (thrown+? [:type :puppetlabs.pcp.message/message-invalid]
+    (is (thrown+? [:type :puppetlabs.pcp.message-v1/message-invalid]
                   (decode (byte-array [1,
                                        2, 0 0 0 2, 123 125])))))
   (testing "it insists on a well-formed envelope"
-    (is (thrown+? [:type :puppetlabs.pcp.message/envelope-malformed]
+    (is (thrown+? [:type :puppetlabs.pcp.message-v1/envelope-malformed]
                   (decode (byte-array [1,
                                        1, 0 0 0 1, 123])))))
   (testing "it insists on a complete envelope"
-    (is (thrown+? [:type :puppetlabs.pcp.message/envelope-invalid]
+    (is (thrown+? [:type :puppetlabs.pcp.message-v1/envelope-invalid]
                   (decode (byte-array [1,
                                        1, 0 0 0 2, 123 125])))))
   (testing "it validates the chunk lengths"
-    (is (thrown+-with-msg? [:type :puppetlabs.pcp.message/message-malformed]
+    (is (thrown+-with-msg? [:type :puppetlabs.pcp.message-v1/message-malformed]
                            #":message \"Invalid chunk length: -1 \(should be between 0 and 13\)\""
                            (decode (byte-array [1,
                                                 1, 0 0 0 2, 123 125,
                                                 2, -1 -1 -1 -1]))))
-    (is (thrown+-with-msg? [:type :puppetlabs.pcp.message/message-malformed]
+    (is (thrown+-with-msg? [:type :puppetlabs.pcp.message-v1/message-malformed]
                            #":message \"Invalid chunk length: 5000 \(should be between 0 and 14\)\""
                            (decode (byte-array [1,
                                                 1, 0 0 0 2, 123 125,
@@ -157,7 +165,7 @@
 (deftest encoder-roundtrip-test
   (testing "it can roundtrip data"
     (let [data (byte-array (map byte "hola"))
-          encoded (encode (set-data (make-message :sender "pcp://client01.example.com/test") data))
+          encoded (encode (set-data (make-message {:sender "pcp://client01.example.com/test"}) data))
           decoded (decode encoded)]
       (is (= (vec (get-data decoded))
              (vec data))))))

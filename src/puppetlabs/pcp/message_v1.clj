@@ -1,10 +1,10 @@
-(ns puppetlabs.pcp.message
+(ns puppetlabs.pcp.message-v1
   (:require [org.clojars.smee.binary.core :as b]
             [cheshire.core :as cheshire]
             [clj-time.core :as t]
             [clj-time.format :as tf]
             [puppetlabs.kitchensink.core :as ks]
-            [puppetlabs.pcp.protocol :refer [Envelope ISO8601]]
+            [puppetlabs.pcp.protocol :refer [v1-Envelope ISO8601]]
             [schema.core :as s]
             [slingshot.slingshot :refer [try+ throw+]]
             [puppetlabs.i18n.core :as i18n])
@@ -16,13 +16,16 @@
   ;; NOTE(richardc) the overriding of :sender here is a bit janky, we
   ;; accept that we can have anything in memory, but we'll check the
   ;; Envelope schema when interacting with the network
-  (merge Envelope
+  (merge v1-Envelope
          {:sender s/Str
           :_chunks {s/Keyword s/Any}}))
 
 (def ByteArray
   "Schema for a byte-array"
   bytes)
+
+(def ^:private empty-byte-array
+  (byte-array 0))
 
 (def FlagSet
   "Schema for the message flags"
@@ -45,7 +48,7 @@
   (String. bytes conversion-charset))
 
 ;; abstract message manipulation
-(s/defn message->envelope :- Envelope
+(s/defn message->envelope :- v1-Envelope
   "Returns the map without any of the known 'private' keys.  Should
   map to an envelope schema."
   [message :- Message]
@@ -71,12 +74,12 @@
 (s/defn get-data :- ByteArray
   "Returns the data from the data frame"
   [message :- Message]
-  (get-in message [:_chunks :data :data] (byte-array 0)))
+  (get-in message [:_chunks :data :data] empty-byte-array))
 
 (s/defn get-debug :- ByteArray
   "Returns the data from the debug frame"
   [message :- Message]
-  (get-in message [:_chunks :debug :data] (byte-array 0)))
+  (get-in message [:_chunks :debug :data] empty-byte-array))
 
 (s/defn set-data :- Message
   "Sets the data for the data frame"
@@ -120,15 +123,18 @@
 
 (s/defn make-message :- Message
   "Returns a new empty message structure"
-  [& args]
-  (let [message (into {:id (ks/uuid)
-                       :targets []
-                       :message_type ""
-                       :sender ""
-                       :expires "1970-01-01T00:00:00.000Z"
-                       :_chunks {}}
-                      (apply hash-map args))]
-    (set-data message (byte-array 0))))
+  ([] (make-message {}))
+  ([k v & kvs]
+   (make-message (apply hash-map k v kvs)))
+  ([opts]
+   (let [message (into {:id (ks/uuid)
+                        :targets []
+                        :message_type ""
+                        :sender ""
+                        :expires "1970-01-01T00:00:00.000Z"
+                        :_chunks {}}
+                       opts)]
+     (set-data message empty-byte-array))))
 
 ;; message encoding/codecs
 
@@ -216,15 +222,15 @@
                        (throw+ {:type ::envelope-malformed
                                 :message (:message &throw-context)})))
           data-chunk (second (:chunks decoded))
-          data-frame (or (:data data-chunk) (byte-array 0))
+          data-frame (or (:data data-chunk) empty-byte-array)
           data-flags (or (get-in data-chunk [:descriptor :flags]) #{})]
-      (try+ (s/validate Envelope envelope)
+      (try+ (s/validate v1-Envelope envelope)
             (catch Object _
               (throw+ {:type ::envelope-invalid
                        :message (:message &throw-context)})))
       (let [message (set-data (merge (make-message) envelope) data-frame data-flags)]
         (if-let [debug-chunk (get (:chunks decoded) 2)]
-          (let [debug-frame (or (:data debug-chunk) (byte-array 0))
+          (let [debug-frame (or (:data debug-chunk) empty-byte-array)
                 debug-flags (or (get-in debug-chunk [:descriptor :flags]) #{})]
             (set-debug message debug-frame debug-flags))
           message)))))
