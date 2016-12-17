@@ -169,8 +169,8 @@
                    (fn [l]
                      (if (or (neg? l) (>= l *message-data-length*))
                        (throw
-                         (IllegalArgumentException.
-                           (str "Invalid chunk length: " l " (should be between 0 and " *message-data-length* ")"))))
+                        (IllegalArgumentException.
+                         (str "Invalid chunk length: " l " (should be between 0 and " *message-data-length* ")"))))
                      l)))
 
 (def chunk-codec

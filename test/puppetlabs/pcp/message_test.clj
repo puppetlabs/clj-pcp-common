@@ -138,21 +138,21 @@
   ;; arrays used in them don't match the expected schemas for the sake
   ;; of brevity
   (s/without-fn-validation
-    (with-redefs [schema.core/validate (fn [_ v] v)]
-      (testing "it decodes the null message"
-        (is (= (dissoc (message->envelope (make-message)) :id)
-               (dissoc (message->envelope (decode (byte-array [1, 1, 0 0 0 2, 123 125]))) :id))))
-      (testing "data is accessible"
-        (let [message (decode (byte-array [1,
-                                           1, 0 0 0 2, 123 125,
-                                           2, 0 0 0 3, 108 111 108]))]
-          (is (= "lol" (String. (get-data message))))))
-      (testing "debug is accessible"
-        (let [message (decode (byte-array [1,
-                                           1, 0 0 0 2, 123 125,
-                                           2, 0 0 0 0,
-                                           3, 0 0 0 3, 108 111 108]))]
-          (is (= "lol" (String. (get-debug message)))))))))
+   (with-redefs [schema.core/validate (fn [_ v] v)]
+     (testing "it decodes the null message"
+       (is (= (dissoc (message->envelope (make-message)) :id)
+              (dissoc (message->envelope (decode (byte-array [1, 1, 0 0 0 2, 123 125]))) :id))))
+     (testing "data is accessible"
+       (let [message (decode (byte-array [1,
+                                          1, 0 0 0 2, 123 125,
+                                          2, 0 0 0 3, 108 111 108]))]
+         (is (= "lol" (String. (get-data message))))))
+     (testing "debug is accessible"
+       (let [message (decode (byte-array [1,
+                                          1, 0 0 0 2, 123 125,
+                                          2, 0 0 0 0,
+                                          3, 0 0 0 3, 108 111 108]))]
+         (is (= "lol" (String. (get-debug message)))))))))
 
 (deftest encoder-roundtrip-test
   (testing "it can roundtrip data"
