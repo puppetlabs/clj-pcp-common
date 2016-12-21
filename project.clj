@@ -1,40 +1,42 @@
-(def i18n-version "0.4.3")
-
-(defproject puppetlabs/pcp-common "0.5.6-SNAPSHOT"
+(defproject puppetlabs/pcp-common "1.0.0-SNAPSHOT"
   :description "Common protocol components for PCP"
   :url "https://github.com/puppetlabs/clj-pcp-common"
   :license {:name "Apache License, Version 2.0"
             :url "http://www.apache.org/licenses/LICENSE-2.0.html"}
+
+  :min-lein-version "2.7.1"
 
   ;; Abort when version ranges or version conflicts are detected in
   ;; dependencies. Also supports :warn to simply emit warnings.
   ;; requires lein 2.2.0+.
   :pedantic? :abort
 
-  :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/tools.logging "0.3.1"]
+  :parent-project {:coords [puppetlabs/clj-parent "0.3.0"]
+                   :inherit [:managed-dependencies]}
 
-                 [puppetlabs/kitchensink "1.3.0"]
+  :dependencies [[org.clojure/clojure]
+                 [org.clojure/tools.logging]
 
-                 [cheshire "5.5.0"]
-                 [prismatic/schema "1.0.4"]
+                 [puppetlabs/kitchensink]
 
-                 [clj-time "0.9.0"]
+                 [cheshire]
+                 [prismatic/schema]
 
                  [com.taoensso/nippy "2.9.0"]
 
                  [org.clojars.smee/binary "0.3.0"]
 
                  ;; try+/throw+
-                 [slingshot "0.12.2"]
+                 [slingshot]
 
-                 [puppetlabs/i18n ~i18n-version]]
+                 [puppetlabs/i18n]]
 
-  :plugins [[lein-release "1.0.5" :exclusions [org.clojure/clojure]]
-            [puppetlabs/i18n ~i18n-version]]
+  :plugins [[lein-parent "0.3.1"]
+            [lein-release "1.0.5" :exclusions [org.clojure/clojure]]
+            [puppetlabs/i18n "0.4.3"]]
 
   :profiles {:cljfmt {:plugins [[lein-cljfmt "0.3.0"]
-                                [lein-parent "0.2.1"]]
+                                [lein-parent "0.3.1"]]
                       :parent-project {:path "../pl-clojure-style/project.clj"
                                        :inherit [:cljfmt]}}
              :test-base {:test-paths ["test"]}

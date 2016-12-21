@@ -17,6 +17,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/puppetlabs/pcp/message.clj
+#: src/puppetlabs/pcp/message_v1.clj
 msgid "first chunk should be type 1"
 msgstr ""
