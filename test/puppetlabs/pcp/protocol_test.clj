@@ -29,6 +29,7 @@
     (is (= ["*" "agent"] (explode-uri "pcp://*/agent")))))
 
 (deftest uri-wildcard?-test
-  (is (= true  (uri-wildcard? "pcp://*/agent")))
-  (is (= true  (uri-wildcard? "pcp://agent01.example.com/*")))
-  (is (= false (uri-wildcard? "pcp://agent01.example.com/agent"))))
+  (is (= ["*" "*"]  (uri-wildcard? "pcp://*/*")))
+  (is (= ["*" "agent"]  (uri-wildcard? "pcp://*/agent")))
+  (is (= ["agent01.example.com" "*"] (uri-wildcard? "pcp://agent01.example.com/*")))
+  (is (= nil (uri-wildcard? "pcp://agent01.example.com/agent"))))

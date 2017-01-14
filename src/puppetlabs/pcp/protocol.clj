@@ -11,6 +11,14 @@
   "Schema for PCP node Uri"
   (s/pred (partial re-matches #"^pcp://[^/]*/[^/]+$") 'uri?))
 
+(def ExplodedUri
+  "Schema for PCP node Exploded Uri - an Uri split into the client and type components"
+  (s/pair s/Str "client" s/Str "type"))
+
+(def InventoryChange
+  "Schema for a single change in inventory record"
+  {:client Uri :change (s/enum -1 1)})
+
 (defn uuid?
   [uuid]
   (re-matches #"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$" uuid))
@@ -53,6 +61,10 @@
   "Data schema for http://puppetlabs.com/inventory_response"
   {:uris [Uri]})
 
+(def InventoryUpdate
+  "Data schema for http://puppetlabs.com/inventory_update"
+  {:changes [InventoryChange]})
+
 (def DestinationReport
   "Defines the data field for a destination report body"
   {:id MessageId
@@ -79,12 +91,13 @@
            (s/optional-key :stage) s/Str
            (s/required-key :time) ISO8601}]})
 
-(s/defn explode-uri :- [s/Str]
+(s/defn explode-uri :- ExplodedUri
   "Parse an Uri string into its component parts.  Raises if incomplete"
   [uri :- Uri]
   (str/split (subs uri 6) #"/"))
 
-(s/defn uri-wildcard? :- s/Bool
+(s/defn uri-wildcard? :- (s/maybe ExplodedUri)
   [uri :- Uri]
   (let [chunks (explode-uri uri)]
-    (some? (some (partial = "*") chunks))))
+    (if (some (partial = "*") chunks)
+      chunks)))
