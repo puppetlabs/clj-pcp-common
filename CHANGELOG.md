@@ -1,3 +1,13 @@
+## 1.1.0
+
+This is a feature release.
+
+* [PCP-600](https://tickets.puppetlabs.com/browse/PCP-600) Add schema
+  definitions to be used in inventory updates. Additionally changes the
+  return value of `uri-wildcard?` to be the exploded Uri in case it is a
+  wildcard, or nil otherwise; this should not impact truthiness of the value.
+* Bump clj-parent to 0.3.2
+
 ## 1.0.0
 
 This is a major feature release introducing PCP v2. It continues to support PCP
