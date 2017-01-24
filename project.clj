@@ -1,4 +1,4 @@
-(defproject puppetlabs/pcp-common "1.0.1-SNAPSHOT"
+(defproject puppetlabs/pcp-common "1.1.0-SNAPSHOT"
   :description "Common protocol components for PCP"
   :url "https://github.com/puppetlabs/clj-pcp-common"
   :license {:name "Apache License, Version 2.0"
@@ -11,7 +11,7 @@
   ;; requires lein 2.2.0+.
   :pedantic? :abort
 
-  :parent-project {:coords [puppetlabs/clj-parent "0.3.0"]
+  :parent-project {:coords [puppetlabs/clj-parent "0.3.2"]
                    :inherit [:managed-dependencies]}
 
   :dependencies [[org.clojure/clojure]
