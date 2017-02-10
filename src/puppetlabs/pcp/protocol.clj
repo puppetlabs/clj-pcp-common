@@ -75,6 +75,10 @@
   {(s/optional-key :id) MessageId
    :description s/Str})
 
+(def v2-ErrorMessage
+  "Data schema for http://puppetlabs.com/error_message"
+  s/Str)
+
 (def TTLExpiredMessage
   "Data schema for http://puppetlabs.com/ttl_expired"
   {:id MessageId})
