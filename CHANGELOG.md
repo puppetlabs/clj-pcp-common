@@ -1,3 +1,10 @@
+## 1.1.1
+
+This is a maintenance release.
+
+* Add a schema for the PCP v2 ErrorMessage, which did not previously match the
+  specification.
+
 ## 1.1.0
 
 This is a feature release.
