@@ -1,3 +1,11 @@
+## 1.1.2
+
+This is a maintenance release.
+
+* [PCP-731](https://tickets.puppetlabs.com/browse/PCP-731) Bump i18n to 0.7.0
+  to pickup a change in pot file name.
+* Bump clj-parent to 0.4.1.
+
 ## 1.1.1
 
 This is a maintenance release.
