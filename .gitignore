@@ -11,3 +11,4 @@ pom.xml.asc
 *~
 /.idea
 *.iml
+/dev-resources/i18n/bin

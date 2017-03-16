@@ -29,11 +29,12 @@
                  ;; try+/throw+
                  [slingshot]
 
-                 [puppetlabs/i18n]]
+                 ;; remove version when moving to clj-parent 0.5+
+                 [puppetlabs/i18n "0.7.0"]]
 
   :plugins [[lein-parent "0.3.1"]
             [lein-release "1.0.5" :exclusions [org.clojure/clojure]]
-            [puppetlabs/i18n "0.4.3"]]
+            [puppetlabs/i18n "0.7.0"]]
 
   :profiles {:cljfmt {:plugins [[lein-cljfmt "0.3.0"]
                                 [lein-parent "0.3.1"]]
