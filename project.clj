@@ -11,7 +11,7 @@
   ;; requires lein 2.2.0+.
   :pedantic? :abort
 
-  :parent-project {:coords [puppetlabs/clj-parent "0.4.1"]
+  :parent-project {:coords [puppetlabs/clj-parent "0.4.2"]
                    :inherit [:managed-dependencies]}
 
   :dependencies [[org.clojure/clojure]
@@ -29,8 +29,7 @@
                  ;; try+/throw+
                  [slingshot]
 
-                 ;; remove version when moving to clj-parent 0.5+
-                 [puppetlabs/i18n "0.7.0"]]
+                 [puppetlabs/i18n]]
 
   :plugins [[lein-parent "0.3.1"]
             [lein-release "1.0.5" :exclusions [org.clojure/clojure]]
