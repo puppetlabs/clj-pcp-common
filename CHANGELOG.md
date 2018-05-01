@@ -1,3 +1,9 @@
+## 1.2.0
+
+This is a feature release.
+
+* Add support for Java 9.
+
 ## 1.1.4
 
 This is a maintenance release
