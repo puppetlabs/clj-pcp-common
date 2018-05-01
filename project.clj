@@ -1,4 +1,4 @@
-(defproject puppetlabs/pcp-common "1.1.6-SNAPSHOT"
+(defproject puppetlabs/pcp-common "1.2.0-SNAPSHOT"
   :description "Common protocol components for PCP"
   :url "https://github.com/puppetlabs/clj-pcp-common"
   :license {:name "Apache License, Version 2.0"
@@ -11,32 +11,28 @@
   ;; requires lein 2.2.0+.
   :pedantic? :abort
 
-  :parent-project {:coords [puppetlabs/clj-parent "0.6.1"]
+  :parent-project {:coords [puppetlabs/clj-parent "2.0.0"]
                    :inherit [:managed-dependencies]}
 
   :dependencies [[org.clojure/clojure]
                  [org.clojure/tools.logging]
-
                  [puppetlabs/kitchensink]
-
                  [cheshire]
                  [prismatic/schema]
-
-                 [com.taoensso/nippy "2.9.0"]
+                 [com.taoensso/nippy]
 
                  [org.clojars.smee/binary "0.3.0"]
 
                  ;; try+/throw+
                  [slingshot]
-
                  [puppetlabs/i18n]]
 
-  :plugins [[lein-parent "0.3.1"]
+  :plugins [[lein-parent "0.3.4"]
             [lein-release "1.0.5" :exclusions [org.clojure/clojure]]
             [puppetlabs/i18n "0.8.0"]]
 
-  :profiles {:cljfmt {:plugins [[lein-cljfmt "0.3.0"]
-                                [lein-parent "0.3.1"]]
+  :profiles {:cljfmt {:plugins [[lein-cljfmt "0.5.7" :exclusions [org.clojure/clojure]]
+                                [lein-parent "0.3.4"]]
                       :parent-project {:path "../pl-clojure-style/project.clj"
                                        :inherit [:cljfmt]}}
              :test-base {:test-paths ["test"]}
