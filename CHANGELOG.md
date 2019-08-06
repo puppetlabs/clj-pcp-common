@@ -1,3 +1,10 @@
+## 1.3.0
+
+This is a maintenance release.
+
+* update clj-parent to 3.1.1
+* remove implementation of uuid?  If an alternative is needed, use kitchensink.core/uuid?
+
 ## 1.2.0
 
 This is a feature release.

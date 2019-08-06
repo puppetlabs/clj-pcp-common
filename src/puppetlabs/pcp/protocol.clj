@@ -19,13 +19,9 @@
   "Schema for a single change in inventory record"
   {:client Uri :change (s/enum -1 1)})
 
-(defn uuid?
-  [uuid]
-  (re-matches #"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$" uuid))
-
 (def MessageId
-  "A message identifier"
-  (s/pred uuid?))
+  "A message identifier, as a string"
+  (s/pred ks/uuid?))
 
 (def v2-Envelope
   "Defines the envelope format of a v2 message"
