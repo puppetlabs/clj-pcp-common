@@ -16,10 +16,6 @@
     (is (thrown? Exception (s/validate Uri "server")))
     (is (thrown? Exception (s/validate Uri "pcp://test/with/too_many_slashes")))))
 
-(deftest uuid?-test
-  (is (uuid? (ks/uuid)))
-  (is (not (uuid? "let me tell you a story"))))
-
 (deftest explode-uri-test
   (testing "It raises on invalid uris"
     (is (thrown? Exception (explode-uri ""))))
