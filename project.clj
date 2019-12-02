@@ -11,7 +11,7 @@
   ;; requires lein 2.2.0+.
   :pedantic? :abort
 
-  :parent-project {:coords [puppetlabs/clj-parent "3.1.1"]
+  :parent-project {:coords [puppetlabs/clj-parent "4.2.10"]
                    :inherit [:managed-dependencies]}
 
   :dependencies [[org.clojure/clojure]
@@ -19,7 +19,6 @@
                  [puppetlabs/kitchensink]
                  [cheshire]
                  [prismatic/schema]
-                 [com.taoensso/nippy]
 
                  [org.clojars.smee/binary "0.3.0"]
 
