@@ -1,3 +1,9 @@
+## 1.3.4
+
+This is a maintenance release.
+
+* update clj-parent to 4.9.1
+
 ## 1.3.3
 
 This is a maintenance release.
