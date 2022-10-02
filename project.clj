@@ -1,4 +1,4 @@
-(defproject puppetlabs/pcp-common "1.3.6-SNAPSHOT"
+(defproject puppetlabs/pcp-common "1.3.6"
   :description "Common protocol components for PCP"
   :url "https://github.com/puppetlabs/clj-pcp-common"
   :license {:name "Apache License, Version 2.0"
